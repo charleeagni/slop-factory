@@ -1,6 +1,10 @@
 # Slop Factory
 
 <p align="center">
+  <a href="https://github.com/charleeagni/slop-factory/releases/download/v0.1.0/SlopFactory-v0.1.0-macOS.dmg">
+    <img alt="Download Slop Factory v0.1.0 for macOS" src="https://img.shields.io/badge/Download%20now-macOS%20v0.1.0-ff2d95?style=for-the-badge&logo=apple&logoColor=white&labelColor=000000">
+  </a>
+  <br>
   <img alt="An OpenAI-generated rainy noodle-stall scene recorded by Slop Factory" src="docs/recording-evidence/openai.png" width="720">
   <br>
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square&logo=apple">
@@ -14,11 +18,9 @@ Slop Factory is a macOS menu bar app that watches the models available through y
 
 ## Install
 
-Prebuilt downloads are currently unavailable. Build from source with macOS 14 or later and Swift 6:
-
-1. Clone this repository and run `Scripts/build-app.sh` from its directory.
-2. Copy `.build/app/Slop Factory.app` into Applications.
-3. Open it. Local builds are ad hoc signed; macOS may require you to allow the app through System Settings.
+1. [Download the macOS DMG](https://github.com/charleeagni/slop-factory/releases/download/v0.1.0/SlopFactory-v0.1.0-macOS.dmg) and open it. A ZIP is also available on [GitHub Releases](../../releases/latest).
+2. Drag `Slop Factory.app` into Applications.
+3. Open it. The v0.1.0 downloads are Developer ID signed and notarized by Apple.
 4. Follow the first-launch prompts. The app finds any installed `claude` and `codex` CLIs and opens X for you to sign in. Sign-in popups open in their own app windows.
 
 Every post includes this repository's URL automatically, including builds from source. No repository setup is needed.
