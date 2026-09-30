@@ -1,0 +1,15 @@
+Another instance of SwiftPM (PID: 48806) is already running using '/Users/REDACTED/merge_conflicts/cute/slop-factory/.build', waiting until that process has finished execution...warning: /Users/REDACTED/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/REDACTED/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: /Users/REDACTED/Library/Caches/org.swift.swiftpm is not accessible or not writable, disabling user-level cache features.
+warning: 'slop-factory': failed storing manifest for 'slop-factory' in cache: attempt to write a readonly database
+[0/1] Planning build
+Building for production...
+[0/5] Write sources
+[2/5] Write swift-version--58304C5D6DBC2206.txt
+[4/6] Compiling FactoryCore CheckScheduler.swift
+[5/7] Compiling SlopFactory SlopFactoryApp.swift
+[5/7] Write Objects.LinkFileList
+[6/7] Linking SlopFactory
+Build of product 'SlopFactory' complete! (8.80s)
+.build/verification/Slop Factory Review 20260930.app: replacing existing signature
+.build/verification/Slop Factory Review 20260930.app

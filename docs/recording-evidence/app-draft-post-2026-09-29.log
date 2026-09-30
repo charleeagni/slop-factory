@@ -1,0 +1,7 @@
+2026-09-29T16:38:55Z step: load compose
+2026-09-29T16:38:58Z step: wait for composer at https://x.com/compose/post
+2026-09-29T16:38:58Z step: insert text
+2026-09-29T16:38:58Z step: attach video
+2026-09-29T16:38:58Z open panel: demo.mp4
+2026-09-29T16:38:58Z step: wait for upload
+2026-09-29T16:39:07Z done: draftReady(runID: "9FB32463-9369-442F-979B-13C7DA536A8D")

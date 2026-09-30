@@ -1,0 +1,4 @@
+<!doctype html><style>html,body{margin:0;background:#2040c0}</style><canvas width="1280" height="720"></canvas><script>
+const c=document.querySelector('canvas').getContext('2d');
+function draw(t){c.fillStyle='#2040c0';c.fillRect(0,0,1280,720);c.fillStyle='#e03020';c.fillRect(0,0,640,360);c.fillStyle='#20c040';c.fillRect(640,360,640,360);c.fillStyle='#ffff00';c.fillRect(40,40,120,80);c.fillStyle=Math.floor(t/2000)%2?'#ffffff':'#000000';c.fillRect(500,300,200,120);requestAnimationFrame(draw)}requestAnimationFrame(draw);
+</script>

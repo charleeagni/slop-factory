@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>After the last train</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0d1423}
+  body{display:grid;place-items:center}
+  canvas{display:block;width:min(100vw,177.7778vh);height:min(56.25vw,100vh);image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</head>
+<body>
+<canvas id="scene" width="320" height="180" role="img" aria-label="Pixel art night market: two still figures at a noodle stall as lanterns glow, rain passes, and steam rises."></canvas>
+<script>
+(() => {
+  const c=document.getElementById('scene'), g=c.getContext('2d',{alpha:false});
+  g.imageSmoothingEnabled=false;
+  const P={sky:'#101827',high:'#1b2638',deep:'#0d1423',roof:'#22263b',brick:'#303147',brick2:'#3b3449',ink:'#111625',line:'#4d4657',slate:'#334558',teal:'#376170',pale:'#81a5a1',wet:'#27394b',wet2:'#354858',light:'#f4c27a',cream:'#f5dda6',orange:'#d98062',red:'#a95052',darkred:'#6e3d4b',gold:'#ba8b5e',white:'#d9d4bd'};
+  const R=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x|0,y|0,w|0,h|0)};
+  const Q=(points,color)=>{g.fillStyle=color;g.beginPath();g.moveTo(points[0][0]|0,points[0][1]|0);for(let i=1;i<points.length;i++)g.lineTo(points[i][0]|0,points[i][1]|0);g.closePath();g.fill()};
+  const line=(x1,y1,x2,y2,color)=>{let dx=Math.abs(x2-x1),dy=Math.abs(y2-y1),sx=x1<x2?1:-1,sy=y1<y2?1:-1,e=dx-dy;for(;;){R(x1,y1,1,1,color);if(x1===x2&&y1===y2)break;let e2=e*2;if(e2>-dy){e-=dy;x1+=sx}if(e2<dx){e+=dx;y1+=sy}}};
+  const glyph={A:['01110','10001','10001','11111','10001','10001','10001'],B:['11110','10001','10001','11110','10001','10001','11110'],D:['11110','10001','10001','10001','10001','10001','11110'],E:['11111','10000','10000','11110','10000','10000','11111'],I:['11111','00100','00100','00100','00100','00100','11111'],L:['10000','10000','10000','10000','10000','10000','11111'],M:['10001','11011','10101','10101','10001','10001','10001'],N:['10001','11001','10101','10011','10001','10001','10001'],O:['01110','10001','10001','10001','10001','10001','01110'],S:['01111','10000','10000','01110','00001','00001','11110'],T:['11111','00100','00100','00100','00100','00100','00100'],U:['10001','10001','10001','10001','10001','10001','01110']};
+  function letters(text,x,y,col,scale=1){for(const ch of text){if(ch===' '){x+=3*scale;continue}const rows=glyph[ch];if(rows){rows.forEach((row,j)=>{for(let i=0;i<5;i++)if(row[i]==='1')R(x+i*scale,y+j*scale,scale,scale,col)})}x+=6*scale}}
+  const smooth=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
+  const envelope=(t,a,b,c,d)=>smooth(a,b,t)*(1-smooth(c,d,t));
+  const hash=n=>{let v=Math.sin(n*127.1+78.233)*43758.5453;return v-Math.floor(v)};
+  function building(){
+    R(0,0,320,109,P.sky);
+    // Cloud banks move through a full, closed orbit.
+    const drift=Math.round(4*Math.sin(phase));
+    for(const [x,y,w] of [[18,19,36],[108,28,23],[260,16,47]]){R(x+drift,y,w,2,P.high);R(x+7+drift,y-2,w-15,2,P.high);R(x+2+drift,y+2,w-10,1,P.high)}
+    R(3,12,2,2,P.slate);R(80,22,1,1,P.pale);R(175,13,1,1,P.slate);R(300,33,2,2,P.slate);
+    // Distant alley, aerials and stacked roofs.
+    R(0,50,73,61,'#242c3e');R(0,45,66,5,P.ink);R(6,40,54,5,'#34354a');R(16,37,32,3,P.ink);
+    for(let i=0;i<6;i++){R(i*12+2,54,8,10,'#1a2334');R(i*12+3,55,6,6,'#3b4052');R(i*12+5,57,2,2,'#6d6570')}
+    R(0,68,74,2,P.ink);for(let i=0;i<6;i++){R(i*13+4,74,1,20,'#414052');R(i*13+9,84,1,15,'#414052')}
+    R(72,58,44,48,'#252d40');R(75,56,38,2,P.ink);R(81,49,27,7,'#313347');R(87,44,2,5,P.ink);R(98,42,2,8,P.ink);
+    R(85,66,19,18,'#172334');R(87,68,15,14,'#526477');R(88,69,13,12,'#2d4c5b');R(94,68,1,14,P.ink);R(87,75,15,1,P.ink);
+    R(77,89,33,17,'#182536');R(82,92,24,14,'#374353');R(110,77,35,31,'#222d3e');
+    R(270,43,50,64,'#242b3d');R(272,40,48,4,P.ink);R(278,34,42,6,'#373449');R(285,27,2,8,P.ink);R(299,30,2,6,P.ink);
+    for(let j=0;j<3;j++)for(let i=0;i<3;i++){let x=277+i*13,y=50+j*17;R(x,y,9,12,'#172334');R(x+1,y+1,7,9,'#455263');R(x+4,y+1,1,9,P.ink);R(x+1,y+6,7,1,P.ink)}
+    R(268,99,52,8,'#172333');
+    // The corner is enclosed by dark masonry and an old shop door.
+    R(0,104,320,9,'#1c2939');R(0,108,320,5,'#394152');R(0,112,320,2,P.ink);
+    R(18,81,24,29,'#111d2d');R(21,84,18,26,'#405066');R(24,87,12,19,'#1d2a3c');R(37,96,2,2,P.gold);
+    R(3,103,53,2,'#51505e');R(46,101,13,4,'#1b2738');
+    // Drainpipe, electrical boxes, and tiny shop fixtures.
+    R(66,41,2,68,P.ink);R(68,51,1,48,'#66717c');R(62,87,7,8,'#5a5967');R(63,89,5,4,P.ink);
+    R(294,72,9,13,'#171f30');R(295,73,7,10,'#69707a');R(297,77,3,2,P.ink);
+    // Overhead wires use stairsteps, no anti-aliased strokes.
+    for(let x=0;x<321;x+=2){let y=Math.round(26+7*Math.sin(Math.PI*x/320));R(x,y,2,1,P.ink)}
+    for(let x=0;x<321;x+=2){let y=Math.round(35+3*Math.sin(Math.PI*x/320));R(x,y,2,1,'#343a4a')}
+    R(253,26,1,18,P.ink);R(62,33,1,14,P.ink);R(102,34,1,13,P.ink);
+  }
+  function street(t,rain){
+    R(0,114,320,66,'#1b2b3d');
+    Q([[0,114],[320,114],[320,133],[0,143]],'#27394a');
+    R(0,119,320,1,'#465062');R(0,122,320,1,'#111e2c');
+    for(let i=0;i<16;i++){let x=(i*47+13)%320,y=131+Math.floor(i/5)*12;R(x,y,12+(i%3)*5,1,i%2?'#314658':'#3b4c5d')}
+    Q([[0,150],[80,143],[115,145],[0,162]],'#263c4b');
+    Q([[227,139],[320,135],[320,154],[245,151]],'#2a3d4e');
+    for(let i=0;i<7;i++){let x=11+i*47,y=159+(i%2)*8;R(x,y,18,1,'#536272')}
+    R(5,172,74,2,'#314557');R(271,164,49,2,'#344b5a');
+    // Puddles keep their stepped shorelines while their light changes.
+    const shimmer=0.4+0.6*Math.pow(Math.sin(phase*2+0.4),2);
+    R(121,142,117,2,'#3a5060');R(130,144,99,2,'#304758');R(144,146,74,1,'#4d606c');
+    R(151,149,60,2,'#233b4e');R(134,158,96,2,'#334c5b');R(149,160,57,1,'#607178');
+    R(168,164,33,1,'#405d66');R(181,170,52,2,'#31495a');
+    const shine=lantern>0.08?P.orange:'#514f5a';
+    R(172,137,2,4,shine);R(183,142,3,4,shine);R(200,139,2,5,shine);
+    R(158,148,4+Math.round(shimmer*3),1,shine);R(174,152,3,2,P.gold);R(190,156,8+Math.round(shimmer*5),1,shine);
+    R(165,164,10,1,shine);R(180,168,4,1,P.gold);R(199,174,13,1,shine);
+    if(rain>0.05){for(let i=0;i<13;i++){let x=22+i*23+Math.round(2*Math.sin(phase+i)),y=136+(i*11)%41;R(x,y,2,1,'#6a8b97');if(i%3===0)R(x+4,y,3,1,'#486373')}}
+    // Foreground curb and grate.
+    R(0,177,320,3,'#111e2d');R(9,173,38,2,'#334858');for(let i=0;i<6;i++)R(12+i*6,174,2,2,'#111e2d');
+  }
+  function stall(){
+    // Deep shadow behind the lit counter.
+    R(125,56,136,64,'#182532');R(132,60,116,49,'#293947');
+    R(137,66,101,35,'#3a414c');R(139,68,97,32,'#253847');
+    for(let i=0;i<9;i++)R(141+i*11,73,1,27,'#46505a');
+    // Side shelves, stacked bowls and a small menu.
+    R(222,78,29,3,P.ink);R(222,86,29,2,'#677076');
+    for(let i=0;i<4;i++){R(224+i*6,82,5,3,P.cream);R(225+i*6,85,3,1,P.teal)}
+    R(233,94,15,17,P.darkred);R(235,96,11,13,'#bd8064');
+    for(let i=0;i<3;i++)R(237,99+i*3,7,1,P.cream);
+    // Roof: thick, layered silhouette and scalloped tile ends.
+    Q([[116,53],[128,46],[255,46],[270,54],[268,60],[119,60]],P.ink);
+    R(130,43,122,4,'#414052');R(125,47,134,5,'#504758');
+    for(let i=0;i<24;i++){let x=121+i*6;R(x,51,5,4,i%2?'#814f59':'#a95e5b');R(x+1,55,4,2,'#563c4b')}
+    R(118,58,150,3,P.ink);R(117,61,151,2,'#5b4553');
+    R(124,63,3,60,P.ink);R(126,65,2,51,'#745b60');R(257,62,3,63,P.ink);R(259,66,2,49,'#715560');
+    // Striped fabric valance.
+    R(129,63,128,13,P.darkred);for(let i=0;i<16;i++)R(130+i*8,64,4,11,i%2?'#b66661':'#99515a');
+    for(let i=0;i<16;i++)R(129+i*8,76,6,2,i%2?'#a65b5d':'#703c4d');
+    // Glow of the work area is all hard-edged dither.
+    if(lantern>0.18){g.globalAlpha=lantern*.28;R(145,79,99,30,'#de9966');R(137,102,116,12,'#de9966');g.globalAlpha=1}
+    // Counter and stool.
+    R(137,108,116,6,'#222432');R(135,110,119,4,'#8a5554');R(138,114,111,9,'#553e48');
+    R(143,122,101,3,P.ink);R(145,125,8,18,'#2a2937');R(233,124,8,20,'#2a2937');
+    R(147,127,88,1,'#a16e5c');R(151,132,77,2,'#413645');
+    R(116,126,20,3,'#5c5361');R(119,129,3,20,P.ink);R(131,129,3,20,P.ink);R(118,142,17,2,'#343548');
+    // Pot, ladle and a single prepared bowl.
+    R(177,100,21,9,'#1c2937');R(179,102,17,5,'#7b8583');R(181,101,14,1,P.white);R(198,98,2,11,P.ink);R(198,97,10,2,'#8b8882');
+    R(213,105,16,2,P.cream);R(215,107,12,4,'#dfddd0');R(217,111,8,2,'#55727b');R(218,105,2,1,P.orange);R(222,105,2,1,P.teal);
+    // Fixed vendor: apron, sleeves, hands, face and hair.
+    R(161,79,17,7,P.ink);R(158,85,24,12,P.ink);R(162,85,16,11,'#d19b78');
+    R(159,82,5,9,'#1b2231');R(173,82,7,7,'#1b2231');R(166,89,2,1,P.ink);R(175,89,2,1,P.ink);R(169,93,5,1,'#9d625a');
+    R(158,97,24,18,'#37616a');R(161,100,18,19,'#e0b48c');R(163,100,14,13,'#eccea0');R(158,102,5,12,'#26505e');R(179,102,5,12,'#26505e');
+    R(156,110,6,4,'#cb9878');R(180,109,6,4,'#cb9878');R(162,117,7,6,'#1b2938');R(174,117,7,6,'#1b2938');
+    // Fixed visitor: raincoat, scarf, head and a bag.
+    R(96,102,17,5,P.ink);R(99,95,15,10,P.ink);R(101,97,12,9,'#c28f78');R(102,100,2,1,P.ink);R(109,101,1,1,P.ink);
+    R(99,106,18,7,'#a55355');R(104,111,17,21,'#48586d');R(100,113,5,18,'#334454');R(120,116,5,10,'#bb876c');
+    R(105,113,12,3,'#d5a36e');R(107,117,13,2,'#9f665f');R(109,131,5,13,P.ink);R(118,131,5,13,P.ink);R(106,144,9,3,'#141d2b');R(117,144,9,3,'#141d2b');
+    R(94,119,11,14,'#26374b');R(95,119,9,2,'#af7b63');R(96,133,8,10,'#26374b');R(99,136,2,8,'#637082');
+    // A patient cat by the drain, entirely still.
+    R(53,131,16,10,P.ink);R(55,127,10,6,P.ink);R(55,124,3,5,P.ink);R(63,124,3,5,P.ink);R(55,135,13,8,'#343848');R(57,131,2,1,P.cream);R(63,131,2,1,P.cream);R(68,136,5,2,P.ink);R(71,132,2,5,P.ink);
+    // Hanging herbs, crates, and a paper cup anchor the frame.
+    R(264,100,10,17,'#272b37');R(266,98,6,4,'#404b4b');R(268,95,2,4,'#557567');R(276,112,19,12,'#453b42');R(278,113,15,9,'#76584f');for(let i=0;i<3;i++)R(279+i*5,116,2,7,P.ink);
+    R(81,119,9,17,'#3b3e4c');R(82,118,7,3,'#64727b');R(83,136,5,6,P.ink);
+  }
+  function lanternAt(x,y,size,glow,seed){
+    R(x+size/2|0,y-7,1,7,P.ink);
+    if(glow>0){g.globalAlpha=glow*.16;R(x-4,y-3,size+8,size+12,P.orange);g.globalAlpha=1}
+    R(x+2,y,size-4,2,'#594354');R(x,y+2,size,size-1,glow>.2?'#b96057':'#624454');
+    R(x+2,y+3,size-4,size-4,glow>.2?P.orange:'#7c4b54');
+    if(glow>.08){g.globalAlpha=glow;R(x+4,y+4,size-8,size-6,P.cream);g.globalAlpha=1}
+    R(x,y+size+1,size,2,'#5d404e');R(x+size/2|0,y+size+3,1,4,'#c78363');
+    R(x+2,y+3,1,size-2,'#713f4d');R(x+size-3,y+3,1,size-2,'#713f4d');
+  }
+  function atmosphere(t,rain){
+    // Rain starts in the distance, then crosses the street and clears.
+    if(rain>0){g.globalAlpha=rain*.8;for(let i=0;i<124;i++){let x=(Math.floor(hash(i+23)*350)-12+Math.floor(t*2.1))%340-10;let y=(Math.floor(hash(i+291)*185)+Math.floor(t*(12+hash(i+71)*8)))%183;let col=i%5===0?'#9bb9bb':'#607f91';R(x,y,i%11===0?2:1,i%7===0?5:3,col)}g.globalAlpha=1}
+    // Wet awning drips continue a little after the shower.
+    const drip=envelope(t,5.0,7.0,13.6,16.0);
+    if(drip>0.1)for(let i=0;i<9;i++){let yy=76+Math.floor((t*11+i*15)%44);g.globalAlpha=drip*.65;R(132+i*14,yy,1,2,'#7a9cad');g.globalAlpha=1}
+    // Steam is built from stair-step pixels and loops on integer harmonics.
+    const steam=.32+.68*envelope(t,2.6,5.2,14.5,17.5);
+    for(let j=0;j<3;j++)for(let k=0;k<8;k++){let cycle=(t+j*6+k*1.5)%18;let y=102-Math.floor(cycle*1.6);if(y<75)continue;let x=220+j*2+Math.round(2*Math.sin(cycle*Math.PI*2/18+j));g.globalAlpha=steam*(1-cycle/22)*(.25+(k%3)*.13);R(x,y,2+(k%3),1,P.cream);g.globalAlpha=1}
+    // A few ripples move across the foreground puddle.
+    if(rain>.12)for(let i=0;i<5;i++){let x=150+i*16,y=151+i*4;let age=(t*1.8+i*2)%5;g.globalAlpha=rain*(1-age/5)*.65;R(x-Math.floor(age),y,2+Math.floor(age*2),1,P.pale);R(x+2+Math.floor(age),y,2,1,P.pale);g.globalAlpha=1}
+  }
+  let phase=0,lantern=0,start;
+  function draw(now){
+    if(start===undefined)start=now;
+    const t=((now-start)%18000)/1000;phase=t*Math.PI*2/18;
+    lantern=envelope(t,.6,3.6,14.1,17.4);
+    const rain=envelope(t,4.5,7.0,12.5,15.6);
+    building();street(t,rain);stall();
+    // Lanterns wake sequentially. Their square cores pulse gently after lighting.
+    lanternAt(55,46,13,envelope(t,.7,3.0,14,17.3)*(.88+.12*Math.sin(phase*4)),0);
+    lanternAt(94,48,11,envelope(t,1.1,3.6,14.2,17.5)*(.9+.1*Math.sin(phase*4+1)),1);
+    lanternAt(245,39,14,envelope(t,1.5,4.1,14.4,17.5)*(.87+.13*Math.sin(phase*4+2)),2);
+    // The stall sign has a short faulty spell during the rain.
+    let sign=lantern;
+    if(t>6.8&&t<10.7){const blink=Math.sin(t*27)+.45*Math.sin(t*61);if(blink<-.38)sign*=.15}
+    R(171,51,58,13,P.ink);R(173,53,54,9,sign>.3?'#b35951':'#74444e');
+    g.globalAlpha=.27+sign*.73;letters('NOODLES',179,54,P.cream,1);g.globalAlpha=1;
+    // A little glow finds the vendor's bowl, the paving and the cat's eyes.
+    if(lantern>.15){g.globalAlpha=lantern*.8;R(214,106,14,1,P.cream);R(139,115,38,1,'#bb7e61');R(56,131,2,1,P.light);R(63,131,2,1,P.light);g.globalAlpha=1}
+    atmosphere(t,rain);
+    // A faint distant window blinks once, like someone turning in for the night.
+    if(t>9.1&&t<10.4){R(280,53,5,7,'#b99070');R(283,57,2,3,P.cream)}
+    requestAnimationFrame(draw)
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

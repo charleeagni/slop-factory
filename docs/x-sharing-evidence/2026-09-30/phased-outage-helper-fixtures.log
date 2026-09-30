@@ -1,0 +1,6 @@
+{"scenario": "normal", "phases": ["READY", "STARTED", "BLOCKED_EXPIRY", "RESTORED_EXPIRY", "BLOCKED_WITHDRAWAL", "RESTORED_FINAL"], "cleanup": "PASS", "expected_exception": null}
+{"scenario": "timeout", "phases": ["READY"], "cleanup": "PASS", "expected_exception": "RuntimeError"}
+{"scenario": "bad_signal", "phases": ["READY"], "cleanup": "PASS", "expected_exception": "AssertionError"}
+{"scenario": "interrupted", "phases": ["READY", "STARTED", "BLOCKED_EXPIRY", "RESTORED_EXPIRY", "BLOCKED_WITHDRAWAL", "RESTORED_FINAL"], "cleanup": "PASS", "expected_exception": "KeyboardInterrupt"}
+{"scenario": "flush_failure", "phases": ["READY", "STARTED", "RESTORED_FINAL"], "cleanup": "PASS", "expected_exception": "RuntimeError"}
+PASS: gated helper fixtures; no real hosts or DNS changes

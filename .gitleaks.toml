@@ -1,0 +1,12 @@
+[extend]
+useDefault = true
+
+# This literal is a deliberately fake publishable key in a validation test.
+# Keep the exception scoped to both the file and the exact value.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+condition = "AND"
+paths = ['''(?:^|/)Tests/FactoryCoreTests/XHandleConfigurationTests\.swift$''']
+regexTarget = "secret"
+regexes = ['''^sb_publishable_test-123$''']

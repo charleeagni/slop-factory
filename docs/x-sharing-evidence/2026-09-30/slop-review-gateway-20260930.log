@@ -1,0 +1,14 @@
+{"path": "rpc/report_x_activity_v1", "profile": null, "status": 400, "code": "22023"}
+{"path": "rpc/withdraw_x_sharing_v1", "profile": null, "status": 400, "code": "22023"}
+{"path": "rpc/register_x_handle", "profile": null, "status": 401, "code": "42501"}
+{"path": "sharing_grants?limit=0", "profile": "x_handle_registry", "status": 406, "code": "PGRST106"}
+{"path": "sharing_grants?limit=0", "profile": null, "status": 404, "code": "PGRST205"}
+{"path": "acknowledged_handles?limit=0", "profile": "x_handle_registry", "status": 406, "code": "PGRST106"}
+{"path": "acknowledged_handles?limit=0", "profile": null, "status": 404, "code": "PGRST205"}
+{"path": "grant_handles?limit=0", "profile": "x_handle_registry", "status": 406, "code": "PGRST106"}
+{"path": "grant_handles?limit=0", "profile": null, "status": 404, "code": "PGRST205"}
+{"path": "username_counts?limit=0", "profile": "x_handle_registry", "status": 406, "code": "PGRST106"}
+{"path": "username_counts?limit=0", "profile": null, "status": 404, "code": "PGRST205"}
+{"path": "feedback_dm_eligible_handles?limit=0", "profile": "x_handle_registry", "status": 406, "code": "PGRST106"}
+{"path": "feedback_dm_eligible_handles?limit=0", "profile": null, "status": 404, "code": "PGRST205"}
+PASS: new RPC validation, legacy rejection, all private relation GETs denied

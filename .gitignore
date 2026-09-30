@@ -1,0 +1,40 @@
+.DS_Store
+.build/
+.swiftpm/
+.scratch/
+
+# Internal implementation and prompt-selection artifacts.
+spec/slop-factory--*/
+
+# Local app output and credentials.
+runs/
+seen.json
+.env
+.env.*
+*.p12
+*.pfx
+*.pem
+*.key
+*.keychain
+*.keychain-db
+*.mobileprovision
+*.zip
+*.dmg
+*.app
+
+# Local credentials, browser sessions, and database exports.
+.aws/
+.ssh/
+.netrc
+.npmrc
+credentials.json
+*.binarycookies
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# Xcode user state.
+DerivedData/
+*.xcuserstate
+xcuserdata/

@@ -1,0 +1,67 @@
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+[1/4] Write sources
+[3/7] Compiling SlopFactory XHandleRegistrationService.swift
+[4/8] Emitting module SlopFactory
+[5/8] Compiling SlopFactory XWebPoster.swift
+[6/8] Compiling SlopFactory SlopFactoryApp.swift
+[6/9] Write Objects.LinkFileList
+[7/9] Linking SlopFactory
+[8/9] Applying SlopFactory
+Build of product 'SlopFactory' complete! (2.04s)
+Sources/SlopFactory/XBrowserView.swift:30:62: warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 28 |     }
+ 29 | 
+ 30 |     static func make(configuration: WKWebViewConfiguration = WKWebViewConfiguration(),
+    |                                                              `- warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 31 |                      isPopup: Bool = false) -> WKWebView {
+ 32 |         let content = WKUserContentController()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk/usr/include/objc/NSObject.h:66:1: note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 64 | 
+ 65 | + (void)initialize;
+ 66 | - (instancetype)init
+    | `- note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 67 | #if NS_ENFORCE_NSOBJECT_DESIGNATED_INITIALIZER
+ 68 |     NS_DESIGNATED_INITIALIZER
+
+[#ActorIsolatedCall]: <https://docs.swift.org/compiler/documentation/diagnostics/actor-isolated-call>
+Sources/SlopFactory/XBrowserView.swift:30:62: warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 28 |     }
+ 29 | 
+ 30 |     static func make(configuration: WKWebViewConfiguration = WKWebViewConfiguration(),
+    |                                                              `- warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 31 |                      isPopup: Bool = false) -> WKWebView {
+ 32 |         let content = WKUserContentController()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk/usr/include/objc/NSObject.h:66:1: note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 64 | 
+ 65 | + (void)initialize;
+ 66 | - (instancetype)init
+    | `- note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 67 | #if NS_ENFORCE_NSOBJECT_DESIGNATED_INITIALIZER
+ 68 |     NS_DESIGNATED_INITIALIZER
+
+[#ActorIsolatedCall]: <https://docs.swift.org/compiler/documentation/diagnostics/actor-isolated-call>
+Native X sharing browser checks passed
+Sources/SlopFactory/XBrowserView.swift:30:62: warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 28 |     }
+ 29 | 
+ 30 |     static func make(configuration: WKWebViewConfiguration = WKWebViewConfiguration(),
+    |                                                              `- warning: call to main actor-isolated initializer 'init()' in a synchronous nonisolated context [#ActorIsolatedCall]
+ 31 |                      isPopup: Bool = false) -> WKWebView {
+ 32 |         let content = WKUserContentController()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.1.sdk/usr/include/objc/NSObject.h:66:1: note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 64 | 
+ 65 | + (void)initialize;
+ 66 | - (instancetype)init
+    | `- note: calls to initializer 'init()' from outside of its actor context are implicitly asynchronous
+ 67 | #if NS_ENFORCE_NSOBJECT_DESIGNATED_INITIALIZER
+ 68 |     NS_DESIGNATED_INITIALIZER
+
+[#ActorIsolatedCall]: <https://docs.swift.org/compiler/documentation/diagnostics/actor-isolated-call>
+Native X sharing choice passed: dismiss-decline
+Native X sharing choice passed: relaunch-accept
+Native X sharing choice passed: relaunch-acknowledged

@@ -1,0 +1,107 @@
+diff --git a/Scripts/test-x-sharing-browser.sh b/Scripts/test-x-sharing-browser.sh
+index 05afea5..9366a78 100755
+--- a/Scripts/test-x-sharing-browser.sh
++++ b/Scripts/test-x-sharing-browser.sh
+@@ -3,7 +3,7 @@ set -euo pipefail
+ cd "$(dirname "$0")/.."
+ swift build --disable-sandbox --product SlopFactory
+ bin_dir="$(swift build --disable-sandbox --show-bin-path)"
+-swiftc -swift-version 5 -I "$bin_dir/Modules" Sources/SlopFactory/XBrowserView.swift Sources/SlopFactory/XWebPoster.swift Sources/SlopFactory/XPostLog.swift Tests/XSharingIntegration/main.swift "$bin_dir"/FactoryCore.build/*.o -o "$bin_dir/x-sharing-browser-integration"
++swiftc -swift-version 5 -I "$bin_dir/Modules" Sources/SlopFactory/XBrowserView.swift Sources/SlopFactory/XWebPoster.swift Sources/SlopFactory/XPostLog.swift Sources/SlopFactory/XHandleRegistrationService.swift Tests/XSharingIntegration/main.swift "$bin_dir"/FactoryCore.build/*.o -o "$bin_dir/x-sharing-browser-integration"
+ "$bin_dir/x-sharing-browser-integration"
+ 
+ # Drive the real native disclosure with temporary choice storage. These stages
+diff --git a/Sources/SlopFactory/XHandleRegistrationService.swift b/Sources/SlopFactory/XHandleRegistrationService.swift
+index c9d89a9..7dfa786 100644
+--- a/Sources/SlopFactory/XHandleRegistrationService.swift
++++ b/Sources/SlopFactory/XHandleRegistrationService.swift
+@@ -96,6 +96,12 @@ enum XHandleRegistrationService {
+         }
+     }
+ 
++    static func installChoiceControl(on window: NSWindow) {
++        let accessory = XUsernameSharingTitlebarAccessory()
++        accessory.layoutAttribute = .right
++        window.addTitlebarAccessoryViewController(accessory)
++    }
++
+     private static func showSaveFailure() {
+         let alert = NSAlert()
+         alert.messageText = "X username sharing could not be saved"
+@@ -114,3 +120,21 @@ enum XHandleRegistrationService {
+         return XHandleRegistrationConfiguration(projectURL: projectURL, publishableKey: publishableKey)
+     }
+ }
++
++@MainActor
++private final class XUsernameSharingTitlebarAccessory: NSTitlebarAccessoryViewController {
++    override func loadView() {
++        let button = NSButton(title: "X username sharing…", target: self, action: #selector(reviewChoice))
++        button.bezelStyle = .rounded
++        button.controlSize = .small
++        button.toolTip = "Review or change X username sharing for this Mac."
++        let size = button.fittingSize
++        button.frame = NSRect(origin: NSPoint(x: 8, y: 4), size: size)
++        view = NSView(frame: NSRect(x: 0, y: 0, width: size.width + 16, height: size.height + 8))
++        view.addSubview(button)
++    }
++
++    @objc private func reviewChoice() {
++        XHandleRegistrationService.presentChoice()
++    }
++}
+diff --git a/Sources/SlopFactory/XWebPoster.swift b/Sources/SlopFactory/XWebPoster.swift
+index 139e109..62f6f86 100644
+--- a/Sources/SlopFactory/XWebPoster.swift
++++ b/Sources/SlopFactory/XWebPoster.swift
+@@ -128,6 +128,7 @@ private final class XWindows: NSObject, NSWindowDelegate {
+         window.center()
+         window.contentView = view
+         window.isReleasedWhenClosed = false
++        XHandleRegistrationService.installChoiceControl(on: window)
+         return window
+     }
+ }
+diff --git a/Tests/XSharingIntegration/Choice/main.swift b/Tests/XSharingIntegration/Choice/main.swift
+index e3334e3..45806f3 100644
+--- a/Tests/XSharingIntegration/Choice/main.swift
++++ b/Tests/XSharingIntegration/Choice/main.swift
+@@ -40,12 +40,20 @@ app.setActivationPolicy(.prohibited)
+ Task { @MainActor in
+     let mode = CommandLine.arguments.last!
+     let coordinator = XHandleRegistrationService.shared
++    let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 900, height: 300),
++                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
++    XHandleRegistrationService.installChoiceControl(on: window)
++    let controls = window.titlebarAccessoryViewControllers.flatMap { descendants($0.view) }
++    guard let sharingButton = controls.compactMap({ $0 as? NSButton }).first(where: { $0.title == "X username sharing…" }) else {
++        require(false, "X window must expose the native sharing control")
++        exit(1)
++    }
+     switch mode {
+     case "dismiss-decline":
+         require(coordinator.choice == .unknown, "first launch must have unknown choice")
+         choose("Close", expecting: "No current sharing choice recorded.") { XHandleRegistrationService.start() }
+         require(coordinator.choice == .unknown && !coordinator.collectionEnabled, "dismissal must leave collection disabled")
+-        choose("Continue without sharing", expecting: "No current sharing choice recorded.") { XHandleRegistrationService.presentChoice() }
++        choose("Continue without sharing", expecting: "No current sharing choice recorded.") { sharingButton.performClick(nil) }
+         try? await Task.sleep(for: .milliseconds(100))
+         require(coordinator.choice == .declined && !coordinator.collectionEnabled, "native decline must persist without enabling collection")
+         require(coordinator.choiceTime != nil, "native decline must record choice time")
+@@ -53,14 +61,14 @@ Task { @MainActor in
+         require(coordinator.choice == .declined && !coordinator.collectionEnabled, "decline must survive process relaunch")
+         XHandleRegistrationService.start()
+         require(NSApp.modalWindow == nil, "declined relaunch must not prompt again")
+-        choose("Acknowledge and share my X username", expecting: "Current choice: Continue without sharing.") { XHandleRegistrationService.presentChoice() }
++        choose("Acknowledge and share my X username", expecting: "Current choice: Continue without sharing.") { sharingButton.performClick(nil) }
+         require(coordinator.choice == .acknowledged && coordinator.collectionEnabled, "native acceptance must persist and enable collection")
+         require(coordinator.choiceTime != nil, "native acceptance must record choice time")
+     case "relaunch-acknowledged":
+         require(coordinator.choice == .acknowledged && coordinator.collectionEnabled, "acknowledgement must survive process relaunch")
+         XHandleRegistrationService.start()
+         require(NSApp.modalWindow == nil, "acknowledged relaunch must not prompt again")
+-        choose("Close", expecting: "Current choice: Acknowledge and share my X username.") { XHandleRegistrationService.presentChoice() }
++        choose("Close", expecting: "Current choice: Acknowledge and share my X username.") { sharingButton.performClick(nil) }
+         require(coordinator.choice == .acknowledged, "closing review must preserve saved acknowledgement")
+     default: require(false, "unknown native choice fixture mode")
+     }

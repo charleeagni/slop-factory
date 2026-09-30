@@ -1,0 +1,22 @@
+Building for debugging...
+[0/6] Write sources
+[1/6] Write swift-version--58304C5D6DBC2206.txt
+[3/6] Emitting module FactoryCoreTests
+[4/6] Compiling FactoryCoreTests XSharingPayloadTests.swift
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SlopFactoryPackageTests
+Build complete! (1.06s)
+Test Suite 'Selected tests' started at 2026-09-29 19:02:40.263.
+Test Suite 'SlopFactoryPackageTests.xctest' started at 2026-09-29 19:02:40.270.
+Test Suite 'SlopFactoryPackageTests.xctest' passed at 2026-09-29 19:02:40.270.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 19:02:40.270.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.007) seconds
+◇ Test run started.
+↳ Testing Library Version: 1400
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite XSharingPayloadTests started.
+◇ Test reportingAndWithdrawalSendOnlyTheContractAndNeverPersistObservedHandles() started.
+✔ Test reportingAndWithdrawalSendOnlyTheContractAndNeverPersistObservedHandles() passed after 0.006 seconds.
+✔ Suite XSharingPayloadTests passed after 0.006 seconds.
+✔ Test run with 1 test in 1 suite passed after 0.006 seconds.

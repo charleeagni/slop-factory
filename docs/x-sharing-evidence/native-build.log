@@ -1,0 +1,10 @@
+warning: /Users/REDACTED/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/REDACTED/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: /Users/REDACTED/Library/Caches/org.swift.swiftpm is not accessible or not writable, disabling user-level cache features.
+warning: 'slop-factory': failed storing manifest for 'slop-factory' in cache: attempt to write a readonly database
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'SlopFactory' complete! (0.15s)
+/tmp/2385-native/Slop Factory.app: replacing existing signature
+/tmp/2385-native/Slop Factory.app

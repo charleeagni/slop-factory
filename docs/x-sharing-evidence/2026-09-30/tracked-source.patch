@@ -1,0 +1,427 @@
+diff --git a/README.md b/README.md
+index 92d69ac..9446c9c 100644
+--- a/README.md
++++ b/README.md
+@@ -26,12 +26,16 @@ Every post includes this repository's URL automatically, including builds from s
+ 
+ You need at least one of the `claude` or `codex` CLIs installed and signed in. You do not need Python, Chrome, ffmpeg, or an X developer account. Use **Draft only** in the menu if you want to inspect a post before clicking Post yourself.
+ 
++For each Codex build, Slop Factory checks the Codex executables on your saved shell PATH and in the standard ChatGPT app locations, then uses the newest installed CLI version it can identify. It does not pin a CLI version.
++
+ ## What the ad leaves out
+ 
+ Slop Factory uses your own CLI subscriptions and can consume tokens. It runs Claude with permission checks skipped and Codex with approvals disabled inside a new folder for each model. It saves the CLI output and generated files under `~/Library/Application Support/Slop Factory/`.
+ 
+ By default, the app records the generated page and uploads the video to your X account without asking each time a new model appears. Keep the app closed, or use **Draft only**, if you do not want automatic posts. Model availability comes from local CLI data and may lag a provider announcement. The app and its posts are a joke about AI demos, not a claim that a model achieved AGI.
+ 
++If a model build fails or produces no page or image, Slop Factory keeps the run log and skips X. New models that fail remain eligible for a later check.
++
+ ## X username sharing
+ 
+ Before observing your X username, Slop Factory asks you to choose **Acknowledge and share my X username** or **Continue without sharing**. Closing the dialog leaves sharing off. Login, posting, Draft only, and model checks remain available with sharing off. Review or change the choice through **X username sharing…** in the menu.
+diff --git a/Sources/FactoryCore/ClaudeDetection.swift b/Sources/FactoryCore/ClaudeDetection.swift
+index 7b1838d..337eb48 100644
+--- a/Sources/FactoryCore/ClaudeDetection.swift
++++ b/Sources/FactoryCore/ClaudeDetection.swift
+@@ -49,13 +49,14 @@ enum ModelDetection {
+         return providers
+     }
+ 
+-    static func savedExecutable(for model: String, appDataFolder: URL) -> URL? {
++    static func savedExecutable(for model: String, appDataFolder: URL, commandRunner: any CommandRunner) -> URL? {
+         let url = appDataFolder.appendingPathComponent("cli-paths.json")
+         guard let data = try? Data(contentsOf: url),
+               let paths = try? JSONDecoder().decode(CLIPaths.self, from: data),
+               let path = model.hasPrefix("claude-") ? paths.claude : paths.codex
+         else { return nil }
+-        return URL(fileURLWithPath: path)
++        if model.hasPrefix("claude-") { return URL(fileURLWithPath: path) }
++        return newestCodexExecutable(savedPath: path, searchPath: paths.path, commandRunner: commandRunner)
+     }
+ 
+     static func codexModels(homeFolder: URL) -> Set<String>? {
+diff --git a/Sources/FactoryCore/FactoryCore.swift b/Sources/FactoryCore/FactoryCore.swift
+index e292835..9e2d790 100644
+--- a/Sources/FactoryCore/FactoryCore.swift
++++ b/Sources/FactoryCore/FactoryCore.swift
+@@ -446,7 +446,7 @@ public enum FactoryCore {
+         let arguments = isClaude
+             ? ["claude", "-p", "--model", model, "--dangerously-skip-permissions", prompt]
+             : ["codex", "exec", "-m", model, "-c", "approval_policy=never", "-s", "workspace-write", "--skip-git-repo-check", prompt]
+-        let savedExecutable = ModelDetection.savedExecutable(for: model, appDataFolder: appDataFolder)
++        let savedExecutable = ModelDetection.savedExecutable(for: model, appDataFolder: appDataFolder, commandRunner: commandRunner)
+         let result = try commandRunner.run(
+             executable: savedExecutable ?? URL(fileURLWithPath: "/usr/bin/env"),
+             arguments: savedExecutable == nil ? arguments : Array(arguments.dropFirst()),
+diff --git a/Sources/FactoryCore/SlopRun.swift b/Sources/FactoryCore/SlopRun.swift
+index 577729c..9f033cb 100644
+--- a/Sources/FactoryCore/SlopRun.swift
++++ b/Sources/FactoryCore/SlopRun.swift
+@@ -1,6 +1,18 @@
+ import Foundation
+ 
+ extension FactoryCore {
++    private enum BuildFailure: LocalizedError {
++        case timedOut
++        case exited(Int32)
++
++        var errorDescription: String? {
++            switch self {
++            case .timedOut: "The model build timed out."
++            case .exited(let code): "The model build exited with code \(code)."
++            }
++        }
++    }
++
+     static func retryFailedManualPosts(
+         appDataFolder: URL, notifier: any Notifier, clock: @escaping () -> Date,
+         poster: any Poster, draftOnly: Bool
+@@ -13,6 +25,11 @@ extension FactoryCore {
+                 notifier.notifyPosted("Slop posted: \(state.model)", url: url)
+                 continue
+             }
++            let runFolder = URL(fileURLWithPath: state.runFolder)
++            let workingFolder = runFolder.appendingPathComponent("working", isDirectory: true)
++            guard let buildLog = try? String(contentsOf: runFolder.appendingPathComponent("build.log"), encoding: .utf8),
++                  buildLog.hasPrefix("Exit code: 0\nTimed out: false\n") else { continue }
++            guard recordablePage(in: workingFolder) != nil else { continue }
+             let pending = ManualPostState(runID: state.runID, model: state.model, runFolder: state.runFolder, text: state.text, status: .pending)
+             try storeLock.withLock { try saveManualPost(pending, storeURL: storeURL) }
+             do {
+@@ -118,6 +135,14 @@ extension FactoryCore {
+     ) throws -> URL? {
+         let storeURL = appDataFolder.appendingPathComponent("seen.json")
+         let build = try runBuild(model: model, commandRunner: commandRunner, appDataFolder: appDataFolder)
++        if build.result.timedOut {
++            notifier.notify("New model detected: \(model). Build failed (timed out). See build.log in the run folder.")
++            throw BuildFailure.timedOut
++        }
++        guard build.result.exitCode == 0 else {
++            notifier.notify("New model detected: \(model). Build failed. See build.log in the run folder.")
++            throw BuildFailure.exited(build.result.exitCode)
++        }
+         do {
+             try recorder.record(workingFolder: build.workingFolder, runFolder: build.runFolder)
+         } catch {
+@@ -175,11 +200,6 @@ extension FactoryCore {
+             notifier.notify("New model detected: \(model). Post failed: \(error)")
+             throw error
+         }
+-        if build.result.timedOut {
+-            notifier.notify("New model detected: \(model). Build failed (timed out).")
+-        } else if build.result.exitCode != 0 {
+-            notifier.notify("New model detected: \(model). Build failed.")
+-        }
+         switch postResult {
+         case .posted(let url):
+             confirmedURL = url
+diff --git a/Sources/SlopFactory/WebViewRecorder.swift b/Sources/SlopFactory/WebViewRecorder.swift
+index 2166c57..e2c89fe 100644
+--- a/Sources/SlopFactory/WebViewRecorder.swift
++++ b/Sources/SlopFactory/WebViewRecorder.swift
+@@ -37,6 +37,7 @@ private final class RecordingWindow: NSWindow {
+ }
+ 
+ private enum RecordingError: LocalizedError {
++    case noRecordableOutput
+     case navigationTimedOut
+     case snapshotFailed
+     case pixelBufferUnavailable
+@@ -44,6 +45,7 @@ private enum RecordingError: LocalizedError {
+ 
+     var errorDescription: String? {
+         switch self {
++        case .noRecordableOutput: "The model produced no page or image to record."
+         case .navigationTimedOut: "The page did not finish loading."
+         case .snapshotFailed: "The web view could not capture a frame."
+         case .pixelBufferUnavailable: "The video encoder could not allocate a frame."
+@@ -88,11 +90,8 @@ private final class RecordingSession: NSObject, WKNavigationDelegate {
+         }
+ 
+         let resolvedFolder = workingFolder.resolvingSymlinksInPath()
+-        if let page = Self.page(in: resolvedFolder) {
+-            try await load(view) { view.loadFileURL(page, allowingReadAccessTo: resolvedFolder) }
+-        } else {
+-            try await load(view) { view.loadHTMLString(Self.emptyCard, baseURL: nil) }
+-        }
++        guard let page = FactoryCore.recordablePage(in: resolvedFolder) else { throw RecordingError.noRecordableOutput }
++        try await load(view) { view.loadFileURL(page, allowingReadAccessTo: resolvedFolder) }
+ 
+         let output = runFolder.appendingPathComponent("demo.mp4")
+         try? FileManager.default.removeItem(at: output)
+@@ -103,39 +102,6 @@ private final class RecordingSession: NSObject, WKNavigationDelegate {
+             throw error
+         }
+     }
+-
+-    private static func page(in folder: URL) -> URL? {
+-        let manager = FileManager.default
+-        guard let entries = manager.enumerator(
+-            at: folder,
+-            includingPropertiesForKeys: [.isRegularFileKey],
+-            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+-        ) else { return nil }
+-        var files: [URL] = []
+-        while let url = entries.nextObject() as? URL {
+-            if (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
+-                if ["node_modules", ".git", ".build"].contains(url.lastPathComponent) {
+-                    entries.skipDescendants()
+-                }
+-                continue
+-            }
+-            files.append(url)
+-        }
+-        let candidates = files.filter { ["html", "htm", "svg", "png", "jpg", "jpeg", "gif", "webp"].contains($0.pathExtension.lowercased()) }
+-        return candidates.sorted { lhs, rhs in
+-            func rank(_ url: URL) -> Int {
+-                let name = url.lastPathComponent.lowercased()
+-                if name == "index.html" && url.deletingLastPathComponent() == folder { return 0 }
+-                if name == "index.html" && url.pathComponents.contains("dist") { return 1 }
+-                if name == "index.html" { return 2 }
+-                if ["html", "htm"].contains(url.pathExtension.lowercased()) { return 3 }
+-                return 4
+-            }
+-            let left = rank(lhs), right = rank(rhs)
+-            return left == right ? lhs.path < rhs.path : left < right
+-        }.first
+-    }
+-
+     private func load(_ view: WKWebView, action: () -> Void) async throws {
+         try await withCheckedThrowingContinuation { continuation in
+             navigationContinuation = continuation
+@@ -261,12 +227,4 @@ private final class RecordingSession: NSObject, WKNavigationDelegate {
+         context.draw(image, in: CGRect(x: 0, y: 0, width: Self.width, height: Self.height))
+         return buffer
+     }
+-
+-    private static let emptyCard = """
+-    <!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1">
+-    <style>html,body{margin:0;width:100%;height:100%;background:#111;color:#fff}
+-    body{display:grid;place-items:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+-    main{text-align:center}h1{font-size:58px;font-weight:700;letter-spacing:-.035em}</style></head>
+-    <body><main><h1>the model produced nothing</h1></main></body></html>
+-    """
+ }
+diff --git a/Tests/FactoryCoreTests/CheckTests.swift b/Tests/FactoryCoreTests/CheckTests.swift
+index 4cc4491..2aa3f18 100644
+--- a/Tests/FactoryCoreTests/CheckTests.swift
++++ b/Tests/FactoryCoreTests/CheckTests.swift
+@@ -170,18 +170,24 @@ struct CheckTests {
+         #expect(!FileManager.default.fileExists(atPath: fixture.storeURL.path))
+     }
+ 
+-    @Test func failedBuildIsSeenAndNotified() throws {
++    @Test func failedBuildIsNotPostedAndRetriesOnNextCheck() throws {
+         let fixture = try Fixture()
+         try fixture.cache(#"{"models":[]}"#)
+         try fixture.check()
+         fixture.runner.results = [CommandResult(exitCode: 3, stdout: "out", stderr: "broken")]
+         try fixture.cache(#"{"models":[{"slug":"gpt-fail","visibility":"list"}]}"#)
+-        try fixture.check()
+-        #expect(try fixture.store().seenModels == ["gpt-fail"])
+-        #expect(fixture.notifications.messages == ["New model detected: gpt-fail. Build failed.", "Slop posted: gpt-fail"])
++        #expect(throws: (any Error).self) { try fixture.check() }
++        #expect(try fixture.store().seenModels.isEmpty)
++        #expect(fixture.notifications.messages == ["New model detected: gpt-fail. Build failed. See build.log in the run folder."])
+         let run = try #require(fixture.runFolders().first)
+         #expect(try String(contentsOf: run.appendingPathComponent("build.log"), encoding: .utf8).contains("broken"))
+-        #expect(fixture.recorder.recordedWorkingFolders.map { $0.resolvingSymlinksInPath() } == [run.appendingPathComponent("working").resolvingSymlinksInPath()])
++        #expect(fixture.recorder.recordedWorkingFolders.isEmpty)
++        #expect(fixture.poster.posts.isEmpty)
++        #expect(try (fixture.store().manualPosts ?? [:]).isEmpty)
++
++        try fixture.check()
++        #expect(try fixture.store().seenModels == ["gpt-fail"])
++        #expect(fixture.poster.posts.count == 1)
+     }
+ 
+     @Test func successfulBuildIsRecordedBeforeModelIsSeen() throws {
+@@ -514,17 +520,19 @@ struct CheckTests {
+         #expect(fixture.poster.posts.count == 1)
+     }
+ 
+-    @Test func timedOutBuildIsSeenAsFailure() throws {
++    @Test func timedOutBuildIsNotPostedOrSeen() throws {
+         let fixture = try Fixture()
+         try fixture.cache(#"{"models":[]}"#)
+         try fixture.check()
+         fixture.runner.results = [CommandResult(exitCode: 9, stdout: "", stderr: "", timedOut: true)]
+         try fixture.cache(#"{"models":[{"slug":"gpt-slow","visibility":"list"}]}"#)
+-        try fixture.check()
+-        #expect(try fixture.store().seenModels == ["gpt-slow"])
+-        #expect(fixture.notifications.messages == ["New model detected: gpt-slow. Build failed (timed out).", "Slop posted: gpt-slow"])
++        #expect(throws: (any Error).self) { try fixture.check() }
++        #expect(try fixture.store().seenModels.isEmpty)
++        #expect(fixture.notifications.messages == ["New model detected: gpt-slow. Build failed (timed out). See build.log in the run folder."])
+         let run = try #require(fixture.runFolders().first)
+-        #expect(fixture.recorder.recordedWorkingFolders.map { $0.resolvingSymlinksInPath() } == [run.appendingPathComponent("working").resolvingSymlinksInPath()])
++        #expect(FileManager.default.fileExists(atPath: run.appendingPathComponent("build.log").path))
++        #expect(fixture.recorder.recordedWorkingFolders.isEmpty)
++        #expect(fixture.poster.posts.isEmpty)
+     }
+ 
+     @Test func crashBeforeCompletionRetriesNextCheck() throws {
+@@ -595,6 +603,30 @@ struct CheckTests {
+         #expect(try fixture.store().manualPosts?[runID]?.status == .completed)
+     }
+ 
++    @Test func failedPostWithNoRecordableOutputIsNotRetried() throws {
++        let fixture = try Fixture()
++        try fixture.cache(#"{"models":[{"slug":"gpt-known","visibility":"list"}]}"#)
++        try fixture.check()
++        fixture.poster.failNext = true
++
++        #expect(throws: (any Error).self) {
++            try FactoryCore.slopNow(model: "gpt-known", commandRunner: fixture.runner, appDataFolder: fixture.data, notifier: fixture.notifications, clock: { fixture.now }, recorder: fixture.recorder, poster: fixture.poster, draftOnly: false, repositoryURL: URL(string: "https://github.com/example/slop-factory")!)
++        }
++        let video = try #require(fixture.poster.posts.first?.video)
++        let run = video.deletingLastPathComponent()
++        try FileManager.default.removeItem(at: run.appendingPathComponent("working/index.html"))
++
++        try fixture.check()
++
++        #expect(fixture.poster.posts.count == 1)
++        #expect(try fixture.store().manualPosts?[run.lastPathComponent]?.status == .failed)
++
++        try "<!doctype html><title>fixture</title>".write(to: run.appendingPathComponent("working/index.html"), atomically: true, encoding: .utf8)
++        try "Exit code: 1\nTimed out: false\n".write(to: run.appendingPathComponent("build.log"), atomically: true, encoding: .utf8)
++        try fixture.check()
++        #expect(fixture.poster.posts.count == 1)
++    }
++
+     @Test func failedSlopNowPostRetriesAfterRelaunch() throws {
+         let fixture = try Fixture()
+         try fixture.cache(#"{"models":[{"slug":"gpt-known","visibility":"list"}]}"#)
+@@ -682,6 +714,7 @@ private final class FakeRunner: CommandRunner {
+         if executable.path == "/bin/zsh" {
+             return CommandResult(exitCode: 0, stdout: cliPathsOutput, stderr: "")
+         }
++        if arguments == ["--version"] { return CommandResult(exitCode: 1, stdout: "", stderr: "") }
+         commands.append(Command(arguments: arguments, workingFolder: workingFolder, timeout: timeout))
+         onRun?()
+         active += 1
+@@ -704,6 +737,7 @@ private final class FakeRecorder: Recorder {
+             failNext = false
+             throw TestCrash()
+         }
++        try "<!doctype html><title>fixture</title>".write(to: workingFolder.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
+     }
+ }
+ 
+diff --git a/Tests/FactoryCoreTests/ClaudeDetectionTests.swift b/Tests/FactoryCoreTests/ClaudeDetectionTests.swift
+index 3b260a8..76b5414 100644
+--- a/Tests/FactoryCoreTests/ClaudeDetectionTests.swift
++++ b/Tests/FactoryCoreTests/ClaudeDetectionTests.swift
+@@ -80,7 +80,7 @@ struct ClaudeDetectionTests {
+         fixture.runner.cliLookup = "claude=\(cli.path)\ncodex=\npath=\(runtime.path):/usr/bin:/bin:/usr/sbin:/sbin\n"
+ 
+         #expect(ModelDetection.discoverProviders(commandRunner: fixture.runner, homeFolder: fixture.home, appDataFolder: fixture.data).contains(.claude))
+-        let discovered = try #require(ModelDetection.savedExecutable(for: "claude-opus-test", appDataFolder: fixture.data))
++        let discovered = try #require(ModelDetection.savedExecutable(for: "claude-opus-test", appDataFolder: fixture.data, commandRunner: fixture.runner))
+         let result = try ProcessCommandRunner().run(executable: discovered, arguments: ["argument with spaces", "model;touch"], workingFolder: fixture.home, timeout: 5, environment: ModelDetection.runtimeEnvironment(appDataFolder: fixture.data))
+ 
+         #expect(result.exitCode == 0)
+@@ -279,6 +279,7 @@ private final class ClaudeRunner: CommandRunner {
+     var aliasesCalled: [String] = []
+ 
+     func run(executable: URL, arguments: [String], workingFolder: URL, timeout: TimeInterval) throws -> CommandResult {
++        if arguments == ["--version"] { return CommandResult(exitCode: 1, stdout: "", stderr: "") }
+         calls.append(Call(executable: executable, arguments: arguments))
+         if executable.path == "/bin/zsh" {
+             return CommandResult(exitCode: 0, stdout: cliLookup, stderr: "")
+diff --git a/Tests/RecorderIntegration/README.md b/Tests/RecorderIntegration/README.md
+index 29505b4..121e65b 100644
+--- a/Tests/RecorderIntegration/README.md
++++ b/Tests/RecorderIntegration/README.md
+@@ -9,8 +9,8 @@ Scripts/test-recorder.sh
+ This compiles `Sources/SlopFactory/WebViewRecorder.swift` directly into a native
+ application event-loop host. It calls the synchronous `Recorder` contract on a
+ background task. There is no copied encoder, alternate HTML loading path, server,
+-or runtime dependency. AVFoundation decodes the resulting movies; Vision reads
+-the fallback card. PNG evidence and MP4 files go to `.build/recorder-evidence`.
++or runtime dependency. AVFoundation decodes the resulting movies. PNG evidence
++and MP4 files go to `.build/recorder-evidence`.
+ Allow several minutes. The host fails after ten minutes if recording hangs.
+ 
+ The suite records static, animated, empty, Claude, OpenAI, repeated static, and
+@@ -19,7 +19,8 @@ again. Each successful movie must contain 270 silent H.264 frames at 1280×720,
+ 15 fps, and 18 seconds within one frame interval. Content checks sample 1, 3, 5,
+ 9, and 17 seconds. The static regions use 20×20 averages and RGB tolerance 25.
+ The animated marker must have both states. Trial pages must contain their warm
+-market scene and changing upper-scene surroundings. The empty card must pass OCR.
++market scene and changing upper-scene surroundings. Empty output must fail
++without creating a movie.
+ A timer fails the host if any visible window intersects an attached display.
+ 
+ Run one case or inspect an existing movie:
+diff --git a/Tests/RecorderIntegration/main.swift b/Tests/RecorderIntegration/main.swift
+index a2a05e1..5c48bd1 100644
+--- a/Tests/RecorderIntegration/main.swift
++++ b/Tests/RecorderIntegration/main.swift
+@@ -4,7 +4,6 @@ import AppKit
+ import AVFoundation
+ import FactoryCore
+ import ImageIO
+-import Vision
+ 
+ struct CheckFailure: Error, CustomStringConvertible { let description: String }
+ func check(_ condition: Bool, _ message: String) throws {
+@@ -93,13 +92,6 @@ func inspect(_ movie: URL, kind: String, evidence: URL) async throws {
+                 let marker = pixels.mean(580,340)
+                 try check(marker.allSatisfy { $0 < 25 } || marker.allSatisfy { $0 > 230 } || kind == "static", "invalid animation marker \(marker)")
+                 markerStates.insert(marker[0] > 128)
+-            case "empty":
+-                try pixels.color(20,20,[17,17,17], tolerance: 10)
+-                let request = VNRecognizeTextRequest()
+-                request.recognitionLevel = .accurate
+-                try VNImageRequestHandler(cgImage: pixels.image()).perform([request])
+-                let text = request.results?.compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ").lowercased() ?? ""
+-                try check(text.contains("the model produced nothing"), "unreadable fallback: \(text)")
+             case "dark":
+                 try pixels.color(300,200,[0,0,0], tolerance: 10)
+                 try pixels.color(600,350,[0,0,0], tolerance: 10)
+@@ -159,6 +151,14 @@ Task.detached {
+             try FileManager.default.createDirectory(at: run, withIntermediateDirectories: true)
+             let working = kind == "empty" ? run.appendingPathComponent("working") : fixtures.appendingPathComponent(kind)
+             if kind == "empty" { try FileManager.default.createDirectory(at: working, withIntermediateDirectories: true) }
++            if kind == "empty" {
++                var rejected = false
++                do { try recorder.record(workingFolder: working, runFolder: run) }
++                catch { rejected = true; print("Expected empty output rejection: \(error)") }
++                try check(rejected, "empty output did not throw")
++                try check(!FileManager.default.fileExists(atPath: run.appendingPathComponent("demo.mp4").path), "empty output created a movie")
++                continue
++            }
+             try recorder.record(workingFolder: working, runFolder: run)
+             try await inspect(run.appendingPathComponent("demo.mp4"), kind: kind, evidence: run)
+             let visible = await MainActor.run { NSApp.windows.filter(\.isVisible).count }
+diff --git a/spec/slop-factory.md b/spec/slop-factory.md
+index 13f17a9..7096999 100644
+--- a/spec/slop-factory.md
++++ b/spec/slop-factory.md
+@@ -87,19 +87,19 @@ Code updates itself. Codex refreshes its cache whenever it runs.
+ - Both run in `runs/<model>/work/` through `Process`.
+ - One shot, no follow-ups: 0 prompts from the user, 1 frozen prompt to the
+   model.
+-- Hard timeout per run (20 min). A failed or empty build still gets recorded
+-  and posted.
++- Hard timeout per run (20 min). A failed build is logged and retried on a
++  later check; it is not recorded or posted.
+ - PATH gotcha: apps launched from Finder don't get your shell's PATH. The app
+-  finds each CLI once with `/bin/zsh -lc 'command -v claude'` and saves the
+-  path.
++  discovers the shell PATH with `/bin/zsh -lc` and saves it. Before each Codex
++  build, it compares available Codex executables on that PATH and in standard
++  ChatGPT app locations, then uses the newest installed CLI version.
+ 
+ ## Recording
+ 
+ - An offscreen `WKWebView` (1280×720) loads `work/index.html`.
+ - `takeSnapshot` at 15 fps feeds `AVAssetWriter`, which writes an H.264
+   `demo.mp4`.
+-- If there's nothing to open, it records a "the model produced nothing" card
+-  instead.
++- If there's no page or image to open, recording fails and nothing is posted.
+ 
+ ## Posting
+ 

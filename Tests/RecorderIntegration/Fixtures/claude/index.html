@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Night Noodle Stall</title>
+<style>
+  html,body{margin:0;padding:0;background:#000;overflow:hidden;width:100%;height:100%;}
+  #c{
+    display:block;
+    width:1280px;height:720px;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+    margin:0 auto;
+  }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+(function(){
+  "use strict";
+
+  // ---- virtual pixel grid: everything is drawn at 160x90 then blown up 8x ----
+  var VW = 160, VH = 90, SCALE = 8;
+  var LOOP = 18; // seconds — every animated value is a function of a phase that
+                 // wraps every LOOP seconds, so the clip has no visible seam.
+
+  var view = document.getElementById('c');
+  var vctx = view.getContext('2d');
+  vctx.imageSmoothingEnabled = false;
+
+  var lo = document.createElement('canvas');
+  lo.width = VW; lo.height = VH;
+  var g = lo.getContext('2d');
+  g.imageSmoothingEnabled = false;
+
+  var COL = {
+    sky1:'#0a0d24', sky2:'#12163c', sky3:'#1b2050',
+    bld1:'#150f2a', bld2:'#1e1640', bld3:'#150f2a',
+    winOn:'#ffcf6b', winOff:'#241c40', winWarm:'#ff9a4a',
+    asphalt:'#101017', asphalt2:'#17171f', puddle:'#0a0b16',
+    curb:'#2a2a36',
+    roof:'#7a2f2f', roofDk:'#4f1e1e', roofEdge:'#a04040',
+    post:'#3c2516', postDk:'#2a1a0f',
+    counter:'#8a5a34', counterDk:'#5e3a1f', counterTop:'#a9743f',
+    lanternBody:'#c93b2e', lanternDk:'#7a1f1f', lanternGlow:'#ffb35c', lanternHot:'#fff2c8',
+    signWood:'#2e1c12', signWoodDk:'#1c1109', signText:'#ffd24a', signTextDim:'#5a4520',
+    steam:'#cfd8e6',
+    rain:'#9fb8d9', rainDim:'#5a6f92',
+    skin:'#e2a46b', hair:'#2a1a12',
+    vendorShirt:'#3a6b5c', vendorApron:'#c9a24a',
+    visitorCoat:'#41418f', visitorCoatDk:'#2c2c66', pants:'#22223a', shoes:'#111111',
+    umbrella:'#b23a5a', umbrellaDk:'#7c2740',
+    bowl:'#3f4550', bowlIn:'#b3702f',
+    star:'#ffffff'
+  };
+
+  function px(x,y,w,h,c){ g.fillStyle=c; g.fillRect(x|0,y|0,w|0,h|0); }
+  function wrap01(x){ x = x - Math.floor(x); return x; }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  function drawSprite(art, ox, oy, pal){
+    for (var r=0;r<art.length;r++){
+      var row = art[r];
+      for (var c=0;c<row.length;c++){
+        var ch = row[c];
+        if (ch === '0') continue;
+        var col = pal[ch];
+        if (!col) continue;
+        px(ox+c, oy+r, 1, 1, col);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- sprites
+  var VENDOR_ART = [
+    "00222200",
+    "02222220",
+    "00111100",
+    "00111100",
+    "03333330",
+    "33333333",
+    "34444443",
+    "04444440",
+    "04444440",
+    "04444440",
+    "05000050",
+    "05000050"
+  ];
+  var VENDOR_PAL = {1:COL.skin,2:'#7a3323',3:COL.vendorShirt,4:COL.vendorApron,5:COL.skin};
+
+  var VISITOR_ART = [
+    "00022000",
+    "00111100",
+    "00111100",
+    "01111110",
+    "06666660",
+    "06666660",
+    "06666660",
+    "06666660",
+    "00777700",
+    "00777700",
+    "00888800"
+  ];
+  var VISITOR_PAL = {1:COL.skin,2:'#3a2a1a',6:COL.visitorCoat,7:COL.pants,8:COL.shoes};
+
+  function drawUmbrella(cx, topY, color, colorDk){
+    px(cx-2, topY,   4, 1, color);
+    px(cx-4, topY+1, 8, 1, color);
+    px(cx-5, topY+2, 10,1, color);
+    px(cx-5, topY+3, 1, 1, colorDk);
+    px(cx+4, topY+3, 1, 1, colorDk);
+    px(cx-1, topY+3, 2, 5, colorDk);
+  }
+
+  // tiny 3x5 pixel font — just enough letters for the sign
+  var FONT = {
+    N:[1,0,1, 1,1,1, 1,1,1, 1,0,1, 1,0,1],
+    O:[1,1,1, 1,0,1, 1,0,1, 1,0,1, 1,1,1],
+    D:[1,1,0, 1,0,1, 1,0,1, 1,0,1, 1,1,0],
+    L:[1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,1,1],
+    E:[1,1,1, 1,0,0, 1,1,0, 1,0,0, 1,1,1],
+    S:[0,1,1, 1,0,0, 0,1,0, 0,0,1, 1,1,0]
+  };
+  function drawText(str, ox, oy, color){
+    var x = ox;
+    for (var i=0;i<str.length;i++){
+      var glyph = FONT[str[i]];
+      if (glyph){
+        for (var r=0;r<5;r++){
+          for (var c=0;c<3;c++){
+            if (glyph[r*3+c]) px(x+c, oy+r, 1, 1, color);
+          }
+        }
+      }
+      x += 4;
+    }
+  }
+
+  // ---------------------------------------------------------------- layout
+  var STALL_X0 = 52, STALL_X1 = 118;
+  var ROOF_Y = 36, COUNTER_Y = 60, GROUND_Y = 66;
+  var LANTERNS = [58, 70, 84, 98, 110];
+
+  // per-star / per-window / per-drop deterministic seeds
+  function seeded(i, salt){
+    var x = Math.sin(i*12.9898 + salt*78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  var STAR_COUNT = 28, STARS = [];
+  for (var i=0;i<STAR_COUNT;i++){
+    STARS.push({ x: (seeded(i,1)*VW)|0, y: (seeded(i,2)*22)|0, ph: seeded(i,3)*Math.PI*2, sp: 2+(i%3) });
+  }
+
+  var WIN_COUNT = 26, WINDOWS = [];
+  for (var i=0;i<WIN_COUNT;i++){
+    var wx = 4 + (i * 6) % (VW-8);
+    if (wx > STALL_X0-8 && wx < STALL_X1+8) continue;
+    WINDOWS.push({ x: wx, y: 14 + ((i*7)%26), lit: seeded(i,4) > 0.35, ph: seeded(i,5)*Math.PI*2, sp: 2+(i%4) });
+  }
+
+  var RAIN_N = 90, DROPS = [];
+  for (var i=0;i<RAIN_N;i++){
+    DROPS.push({ x: seeded(i,6)*VW, seed: seeded(i,7), active: seeded(i,8) });
+  }
+  var RAIN_WRAPS = 16; // full falls per loop — integer keeps it seamless
+
+  var STEAM_N = 10, STEAMPTS = [];
+  for (var i=0;i<STEAM_N;i++){
+    STEAMPTS.push({ off: i/STEAM_N, wraps: 3 });
+  }
+
+  var RIPPLES = [
+    {x:78, y:VH-6, wraps:6, off:0.0},
+    {x:96, y:VH-4, wraps:6, off:0.33},
+    {x:64, y:VH-8, wraps:6, off:0.66}
+  ];
+
+  // ---------------------------------------------------------------- layers
+  function drawSky(){
+    px(0,0,VW,16,COL.sky1);
+    px(0,16,VW,12,COL.sky2);
+    px(0,28,VW,14,COL.sky3);
+  }
+
+  function drawStars(phase){
+    for (var i=0;i<STARS.length;i++){
+      var s = STARS[i];
+      var tw = 0.5 + 0.5*Math.sin(phase*s.sp + s.ph);
+      if (tw < 0.45) continue;
+      g.globalAlpha = tw;
+      px(s.x, s.y, 1, 1, COL.star);
+      g.globalAlpha = 1;
+    }
+  }
+
+  function drawBuildings(phase){
+    px(0, 20, VW, 24, COL.bld1);
+    px(0, 26, 30, 18, COL.bld2);
+    px(120, 22, VW-120, 22, COL.bld2);
+    px(0, 44, VW, 2, COL.bld3);
+
+    for (var i=0;i<WINDOWS.length;i++){
+      var w = WINDOWS[i];
+      if (!w.lit) { px(w.x,w.y,2,2,COL.winOff); continue; }
+      var flick = 0.7 + 0.3*Math.sin(phase*w.sp + w.ph);
+      g.globalAlpha = clamp(flick,0.3,1);
+      px(w.x,w.y,2,2,COL.winOn);
+      g.globalAlpha = 1;
+    }
+  }
+
+  function lightningFlash(phase){
+    // one brief storm flash near the rain peak — the scene's little surprise
+    var f = 0;
+    var d1 = Math.abs(wrap01((phase/(2*Math.PI)) - 0.52));
+    var d2 = Math.abs(wrap01((phase/(2*Math.PI)) - 0.535));
+    if (d1 < 0.004) f = Math.max(f, 1 - d1/0.004);
+    if (d2 < 0.006) f = Math.max(f, 0.6*(1 - d2/0.006));
+    if (f > 0){
+      g.globalAlpha = f*0.55;
+      px(0,0,VW,VH,'#dfe8ff');
+      g.globalAlpha = 1;
+    }
+    return f;
+  }
+
+  function stallStructure(litAmt){
+    // roof
+    px(STALL_X0-4, ROOF_Y, STALL_X1-STALL_X0+8, 4, COL.roofDk);
+    px(STALL_X0-2, ROOF_Y+4, STALL_X1-STALL_X0+4, 3, COL.roof);
+    px(STALL_X0-2, ROOF_Y+7, STALL_X1-STALL_X0+4, 1, COL.roofEdge);
+    // posts
+    px(STALL_X0, ROOF_Y+8, 2, COUNTER_Y-ROOF_Y-8, COL.postDk);
+    px(STALL_X1-2, ROOF_Y+8, 2, COUNTER_Y-ROOF_Y-8, COL.postDk);
+    px(STALL_X0+18, ROOF_Y+8, 2, COUNTER_Y-ROOF_Y-8, COL.post);
+    px(STALL_X1-20, ROOF_Y+8, 2, COUNTER_Y-ROOF_Y-8, COL.post);
+    // counter
+    px(STALL_X0-2, COUNTER_Y, STALL_X1-STALL_X0+4, 2, COL.counterTop);
+    px(STALL_X0-2, COUNTER_Y+2, STALL_X1-STALL_X0+4, 6, COL.counter);
+    px(STALL_X0-2, COUNTER_Y+7, STALL_X1-STALL_X0+4, 2, COL.counterDk);
+  }
+
+  function drawLanterns(phase){
+    var glowBase = 0.5 - 0.5*Math.cos(phase); // 0 at loop edges, 1 mid-loop: "wake up" then settle
+    for (var i=0;i<LANTERNS.length;i++){
+      var lx = LANTERNS[i];
+      var flick = glowBase + 0.08*Math.sin(phase*9 + i*1.7);
+      flick = clamp(flick, 0, 1);
+      // string
+      px(lx, ROOF_Y+7, 1, 3, COL.postDk);
+      // glow halo (soft, but hard-edged pixel layers = pixel-art bloom)
+      if (flick > 0.15){
+        g.globalAlpha = flick*0.25;
+        px(lx-3, ROOF_Y+8, 7, 7, COL.lanternGlow);
+        g.globalAlpha = flick*0.45;
+        px(lx-2, ROOF_Y+9, 5, 5, COL.lanternGlow);
+        g.globalAlpha = 1;
+      }
+      // body
+      px(lx-1, ROOF_Y+10, 3, 4, flick>0.5 ? COL.lanternHot : COL.lanternBody);
+      px(lx-1, ROOF_Y+13, 3, 1, COL.lanternDk);
+      if (flick > 0.6){
+        g.globalAlpha = (flick-0.6)*2;
+        px(lx, ROOF_Y+11, 1, 1, COL.lanternHot);
+        g.globalAlpha = 1;
+      }
+    }
+  }
+
+  function drawSign(phase){
+    var bx = STALL_X0+14, by = ROOF_Y-9, bw = STALL_X1-STALL_X0-28;
+    px(bx, by, bw, 9, COL.signWoodDk);
+    px(bx+1, by+1, bw-2, 7, COL.signWood);
+
+    // flicker: mostly lit, with short deterministic dropouts each loop
+    var flicker = 1;
+    var localPhase = wrap01(phase/(2*Math.PI));
+    if (Math.abs(wrap01(localPhase-0.18)) < 0.006) flicker = 0.15;
+    if (Math.abs(wrap01(localPhase-0.19)) < 0.004) flicker = 0.9;
+    if (Math.abs(wrap01(localPhase-0.61)) < 0.008) flicker = 0.2;
+    flicker *= 0.85 + 0.15*Math.sin(phase*5);
+    var col = flicker > 0.5 ? COL.signText : COL.signTextDim;
+    drawText("NOODLES", bx+4, by+2, col);
+  }
+
+  function drawBowlAndSteam(phase){
+    var bx = 82, by = COUNTER_Y-3;
+    px(bx-4, by, 9, 3, COL.bowl);
+    px(bx-3, by, 7, 1, COL.bowlIn);
+
+    for (var i=0;i<STEAMPTS.length;i++){
+      var s = STEAMPTS[i];
+      var lp = wrap01(phase/(2*Math.PI)*s.wraps + s.off);
+      var rise = lp*20;
+      var sway = Math.sin(lp*Math.PI*2*2 + i)*2.2*lp;
+      var alpha = Math.sin(lp*Math.PI) * 0.5;
+      if (alpha <= 0.02) continue;
+      g.globalAlpha = alpha;
+      px(bx-0.5+sway, by-rise, 1, 1, COL.steam);
+      g.globalAlpha = 1;
+    }
+  }
+
+  function drawFigures(){
+    drawSprite(VENDOR_ART, 68, 48, VENDOR_PAL);
+    drawSprite(VISITOR_ART, 94, 50, VISITOR_PAL);
+    drawUmbrella(98, 46, COL.umbrella, COL.umbrellaDk);
+  }
+
+  function drawStreet(){
+    px(0, GROUND_Y, VW, VH-GROUND_Y, COL.asphalt);
+    px(0, GROUND_Y, VW, 2, COL.curb);
+    px(56, GROUND_Y+4, 50, 14, COL.puddle);
+    px(90, GROUND_Y+18, 34, 10, COL.puddle);
+  }
+
+  function drawPuddleReflection(phase, litAmt){
+    // grab everything drawn so far above the waterline and flip it into the puddle,
+    // slicing into 1px rows with a sine offset so the water looks unsettled
+    var waterline = GROUND_Y;
+    var reflectH = 26;
+    var wobble = 0.6 + 0.4*Math.sin(phase*1.3);
+    for (var r=0;r<reflectH;r++){
+      var srcY = waterline - 1 - r;
+      if (srcY < 0) break;
+      var destY = waterline + r;
+      if (destY >= VH) break;
+      var offset = Math.round(Math.sin(phase*2 + r*0.5) * 1.4 * wobble);
+      g.globalAlpha = 0.32 * (1 - r/reflectH);
+      g.drawImage(lo, 0, srcY, VW, 1, offset, destY, VW, 1);
+      g.globalAlpha = 1;
+    }
+    // dark water tint on top so it still reads as puddle, not a mirror
+    g.globalAlpha = 0.45;
+    px(56, GROUND_Y+4, 50, 14, COL.puddle);
+    px(90, GROUND_Y+18, 34, 10, COL.puddle);
+    g.globalAlpha = 1;
+  }
+
+  function drawRipples(phase){
+    for (var i=0;i<RIPPLES.length;i++){
+      var rp = RIPPLES[i];
+      var lp = wrap01(phase/(2*Math.PI)*rp.wraps + rp.off);
+      var rad = lp*6;
+      var alpha = (1-lp)*0.4;
+      if (alpha <= 0.02) continue;
+      g.globalAlpha = alpha;
+      g.strokeStyle = COL.rainDim;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.arc(rp.x, rp.y, rad, 0, Math.PI*2);
+      g.stroke();
+      g.globalAlpha = 1;
+    }
+  }
+
+  function rainEnvelope(phase){
+    // gathers, falls hard, then clears back to still — bell curve over the loop
+    return clamp((1 - Math.cos(phase - 0.4)) / 2, 0, 1);
+  }
+
+  function drawRain(phase, intensity){
+    g.strokeStyle = COL.rain;
+    for (var i=0;i<DROPS.length;i++){
+      var d = DROPS[i];
+      if (d.active > intensity) continue;
+      var lp = wrap01(d.seed + phase/(2*Math.PI)*RAIN_WRAPS);
+      var y = lp*VH;
+      var x = d.x - 2; // slight diagonal fall
+      g.globalAlpha = 0.35 + 0.35*intensity;
+      g.beginPath();
+      g.moveTo(x, y);
+      g.lineTo(x-2, y+4);
+      g.stroke();
+      g.globalAlpha = 1;
+    }
+  }
+
+  // ---------------------------------------------------------------- frame
+  function draw(phase){
+    g.clearRect(0,0,VW,VH);
+    var litAmt = 0.5 - 0.5*Math.cos(phase);
+    var rain = rainEnvelope(phase);
+
+    drawSky();
+    drawStars(phase);
+    drawBuildings(phase);
+    drawStreet();
+    drawPuddleReflection(phase, litAmt);
+    drawRipples(phase);
+    stallStructure(litAmt);
+    drawLanterns(phase);
+    drawSign(phase);
+    drawBowlAndSteam(phase);
+    drawFigures();
+    drawRain(phase, rain);
+    lightningFlash(phase);
+
+    vctx.drawImage(lo, 0, 0, VW, VH, 0, 0, view.width, view.height);
+  }
+
+  var t0 = performance.now();
+  function frame(now){
+    var elapsed = (now - t0) / 1000;
+    var t = elapsed % LOOP;
+    var phase = (t / LOOP) * Math.PI * 2;
+    draw(phase);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

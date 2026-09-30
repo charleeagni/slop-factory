@@ -1,0 +1,307 @@
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.17s)
+Test Suite 'All tests' started at 2026-09-30 12:04:46.270.
+Test Suite 'All tests' passed at 2026-09-30 12:04:46.279.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.009) seconds
+◇ Test run started.
+↳ Testing Library Version: 1400
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite XSharingPersistenceTests started.
+◇ Suite XHandleTimerTests started.
+◇ Suite XSharingRetryPolicyTests started.
+◇ Suite XHandleRegistrationTransportTests started.
+◇ Suite XSharingPayloadTests started.
+◇ Suite RepositoryURLTests started.
+◇ Suite CheckSchedulerTests started.
+◇ Suite CodexExecutableResolverTests started.
+◇ Suite ClaudeDetectionTests started.
+◇ Suite XHandleConfigurationTests started.
+◇ Suite OnboardingTests started.
+◇ Suite XHandleInterruptionTests started.
+◇ Suite CheckTests started.
+◇ Suite XHandleRegistrationTests started.
+◇ Test ordinaryReportRetriesOnceWithSameSequenceAfterFiveSeconds() started.
+◇ Test initialDeclineSurvivesRelaunchAndCleansLegacyQueue() started.
+◇ Test concurrentWindowsKeepSeparateLiveReports() started.
+◇ Test failedAcknowledgementAndUnreadableStateFailClosed() started.
+◇ Test sharingKeyRepairRetriesAfterItsFirstSaveFails() started.
+◇ Test expiredReplacementEventCannotReplayAfterWithdrawalRecovery() started.
+◇ Test replacementWaitsForSameDestinationWithdrawalThenReportsLiveEvent() started.
+◇ Test lateOldGrantReplyCannotBlockOrDisableReplacement() started.
+◇ Test accountAbsenceInvalidatesLateReplyEvenAfterSameHandleRediscovery() started.
+◇ Test windowsDeduplicateRediscoveryAndRejectPopupsAndLateEvents() started.
+◇ Test sharingRequiresDurableChoiceAndNeverReplaysOnRestart() started.
+◇ Test withdrawalForOtherDestinationDoesNotBlockNewDestinationActivity() started.
+◇ Test sharingDestinationRepairWithdrawsOldGrantAfterAnUnsavedChange() started.
+◇ Suite XHandleRecoveryTests started.
+◇ Test sharingKeyRepairSurvivesAnOlderInFlightWithdrawalFailure() started.
+◇ Test customPostTextKeepsPreviousPostAndRepository() started.
+◇ Test durableWithdrawalRetriesAtOneFiveAndThirtyMinutes() started.
+◇ Test declinePersistsWithdrawalAndReplacementUsesFreshGrant() started.
+◇ Test ordinaryRetryHonorsDeadlineAndBoundsTimeout() started.
+◇ Test configurationRotationKeepsChoiceAndDestinationChangeWithdrawsOriginalGrant() started.
+◇ Test customPromptOverridesFrozenUntilReset() started.
+◇ Test timerRetriesWithoutResumeAndRepeatedObservationsKeepTheDeadline() started.
+◇ Test monotonicExpiryDropsRetryEvenIfWallClockDoesNotMove() started.
+◇ Test completingOneTimerRetryDoesNotCancelAnotherHandle() started.
+◇ Test numericRetryAfterReturnsDelayInSeconds() started.
+◇ Test wallClockAdjustmentDoesNotExpireLiveOrdinaryEvent(jump:) started.
+◇ Test failedDeclineStopsCollectionAndRetainsGrantForSuccessfulSaveRetry() started.
+◇ Test declinedRestartResumesOnlyUsernameFreeWithdrawalThenDeletesOutbox() started.
+◇ Test withdrawalHonorsLongerRetryAfterWithoutOrdinaryDeadline() started.
+◇ Test permanentWithdrawalRetriesOnceOnLaunchAndOnceOnKeyRepair() started.
+◇ Test preservesShortRemainingDeadlineAndRPCOutcome() started.
+◇ Test exposesHTTPStatusAndRetryAfterWithoutTreatingFailureStatusAsTransportFailure() started.
+◇ Test corruptStateIsPreservedAcrossDeclineAcknowledgementAndResume() started.
+◇ Test invalidAndPastRetryAfterValuesAreIgnored() started.
+◇ Test boundsRequestsToFifteenSeconds() started.
+◇ Test restartDoesNotReuseSequenceReservedForUnconfirmedReport() started.
+◇ Test malformedWithdrawalMetadataFailsClosedWithoutReplacingRevocationData() started.
+◇ Test transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test reportingAndWithdrawalSendOnlyTheContractAndNeverPersistObservedHandles() started.
+◇ Test HTTPDateRetryAfterReturnsDelayRelativeToClock() started.
+◇ Test failedLegacyCleanupKeepsQueueUnusedAndChoiceDisabled() started.
+◇ Test permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test keyChangeReleasesClientFailureExactlyOnceAndIdenticalConfigurationDoesNotRetry() started.
+◇ Test freshInstallCanDraftWithoutRepositorySetup() started.
+◇ Test launchWithRotatedKeyKeepsChoiceAndWithdrawsUsingRepairedCredentials() started.
+◇ Test recoveringClaudeAliasSeedsQuietlyWhileHealthyCodexStillPostsNewModel() started.
+◇ Test upgradeNeverReportsPendingOrDeliveredLegacyHandlesAfterAcknowledgement() started.
+◇ Test unconfiguredObservationsAreNotCollectedForLaterConfiguration() started.
+◇ Test failedClaudeAliasesRemainPendingWhileCodexSeedsAndWorks() started.
+◇ Test equivalentDestinationDoesNotClearCurrentAccountOrReleasePausedRequest() started.
+◇ Test changedDisclosureWithdrawsSavedGrantWithoutReusingItsChoice() started.
+◇ Test keyChangeDuringRequestAllowsOneRetryAfterOldKeyIsRejected() started.
+◇ Test changedAliasIdIsReportedAsNewModel() started.
+◇ Test aliasesResolveFromClaudeEventArray() started.
+◇ Test loginShellLocationsAreSavedAndReused() started.
+◇ Test partialAliasBaselineKeepsRecoveredAliasSilentAndDetectsChanges() started.
+◇ Test releaseDraftLinksToBundledRepositoryEvenWithLocalOverride() started.
+◇ Test localBuildCanUseConfiguredRepository() started.
+◇ Test additionalOptionsAreDetected() started.
+◇ Test unavailableCodexCacheSeedsWhenItFirstBecomesReadable() started.
+◇ Test missingClaudeAndFailedAliasLeaveCodexWorking() started.
+◇ Test errorResultDoesNotRegisterModelUsage() started.
+◇ Test confirmedRetryPostSurvivesRunURLWriteFailureWithoutPostingAgain() started.
+◇ Test invalidConfigurationFallsBackToProjectRepository() started.
+◇ Test destinationChangeWhileSubmittingWaitsForTheSameHandleToFinish() started.
+◇ Test unreadableConfigDoesNotBlockAliasesOrCodex() started.
+◇ Test aliasesResolveFromResultModelUsage() started.
+◇ Test discoveredEnvShebangCliRunsWithLoginShellPath() started.
+◇ Test firstLaunchSeedsOnlyFoundProviderThenNextCheckRunsNewModel() started.
+◇ Test nextPostLinksPreviousPostForSameProvider() started.
+◇ Test pendingObservationIsReadableFromDiskBeforeResponseCompletes() started.
+◇ Test pendingHistoryStaysWithItsDestinationAndResumesWhenSelectedAgain() started.
+◇ Test missingAndUnreadableCacheDoNotNotifyOrCrash() started.
+◇ Test firstLaunchWithNoCLILeavesStoreMissingAndRunsNoCheck() started.
+◇ Test firstLaunchDoesNotCreateBaselineWhenEverySourceFails() started.
+◇ Test choosesNewestInstalledCLIAndRechecksOnNextBuild() started.
+◇ Test failedBuildIsNotPostedAndRetriesOnNextCheck() started.
+◇ Test cancellationAfterRemoteCommitRetriesSafelyOnRestart() started.
+◇ Test failedInitialWriteStillSubmitsButKeepsVisiblePendingState() started.
+◇ Test failedRunWithSavedURLIsReconciledWithoutPostingAgain() started.
+◇ Test retryDeadlineSurvivesRestart() started.
+◇ Test manualPostDuringLaterCheckPreservesSeenModels() started.
+◇ Test failedWriteAfterRemoteSuccessRetriesAfterDiskRecoveryAndPersistsDelivery() started.
+◇ Test manualPostBeforeDraftReadyReturnDoesNotAskOwnerToPostAgain() started.
+◇ Test manualPostAfterDraftReadySavesURLAndLinksNextPost() started.
+◇ Test requestDuringARunIsSkipped() started.
+◇ Test unreadableCachePathDoesNotNotifyOrCrash() started.
+◇ Test slopNowBuildsAndPostsAKnownModelWithoutAnyNewModel() started.
+◇ Test recordingFailureNotifiesAndRetriesModel() started.
+◇ Test interruptedAfterSeedingResumesLoginAndRegistrationWithoutRepeatingEither() started.
+◇ Test failedSlopNowPostRetriesRecordedDemoOnNextCheck() started.
+◇ Test savedRunURLRecoversConfirmedPostAfterSeenStoreFailureAndRestart() started.
+◇ Test firstCheckSeedsVisibleModelsWithoutNotification() started.
+◇ Test launchAndWakeCheckOnlyWhenMoreThanThirtyMinutesOverdue() started.
+◇ Test legacyStoreWithoutSourceStateSeedsQuietlyThenDetectsNewModels() started.
+◇ Test firstLaunchWithoutLastCheckRunsImmediately() started.
+◇ Test installingCLIOnLaterLaunchSeedsExistingModelsWithoutPosting() started.
+◇ Test registrationFailureCanBeRetried() started.
+◇ Test uncertainManualPostIsNotRetriedAndDraftOnlyRetryWaitsForOwner() started.
+◇ Test approvalGatedRegistrationIsRecheckedUntilApproved() started.
+◇ Test successfulBuildIsRecordedBeforeModelIsSeen() started.
+◇ Test deliberateDisableAfterSuccessfulSetupDoesNotReenableItem() started.
+◇ Test customRunSharesTheOneAtATimeGuard() started.
+◇ Test failedPostWithNoRecordableOutputIsNotRetried() started.
+◇ Test failedSlopNowPostRetriesAfterRelaunch() started.
+◇ Test twoModelsRunSequentially() started.
+◇ Test laterCheckNotifiesEachNewVisibleModelAndPersistsIt() started.
+◇ Test confirmedManualFailureRetriesOnNextCheckAndRecordsSuccessfulHistory() started.
+◇ Test failedPostNotifiesAndLeavesModelUnseenForRetry() started.
+◇ Test completedOnboardingDoesNotRepeatLoginOrRegistration() started.
+◇ Test claudeModelUsesHeadlessPermissionSkippingCommand() started.
+◇ Test crashBeforeCompletionRetriesNextCheck() started.
+◇ Test statusSnapshotShowsWatchedProvidersAndLatestPostAfterChecks() started.
+◇ Test timedOutBuildIsNotPostedOrSeen() started.
+◇ Test claudePostLinksPreviousOpenAIPost() started.
+◇ Test case passing 1 argument jump → 86400.0 to wallClockAdjustmentDoesNotExpireLiveOrdinaryEvent(jump:) started.
+◇ Test case passing 1 argument jump → -86400.0 to wallClockAdjustmentDoesNotExpireLiveOrdinaryEvent(jump:) started.
+◇ Test newModelPostsRecordedVideoAndSavesItsURL() started.
+◇ Test confirmedPostSurvivesRunURLWriteFailureWithoutRetryingPost() started.
+◇ Test overlappingEventsSubmitEachAccountOnceAndLogoutClearsCurrentAccount() started.
+◇ Test draftReadyAsksOwnerToPostWithoutSavingAPostURL() started.
+◇ Test case passing 1 argument status → 429 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test case passing 1 argument status → 503 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test untrustedOrInvalidObservationsNeverSubmit() started.
+◇ Test accountObservationSubmitsNormalizedHandleOnce() started.
+◇ Test case passing 1 argument status → 500 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test case passing 1 argument status → -1 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test case passing 1 argument status → 400 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test case passing 1 argument status → 408 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test case passing 1 argument status → 403 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test case passing 1 argument status → 401 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test case passing 1 argument status → 599 to transientOrdinaryFailuresRetryOnlyOnce(status:) started.
+◇ Test failedSubmissionStaysUndeliveredAndRepeatedEventsDoNotFloodBackend() started.
+◇ Test case passing 1 argument status → 404 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test case passing 1 argument status → 409 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test pendingObservationSurvivesRestartAndDeliveredObservationDoesNotResubmit() started.
+◇ Test onlyExplicitHTTPSProjectAndPublishableKeyEnableSubmission() started.
+◇ Test case passing 1 argument status → 422 to permanentOrdinaryFailureNeverRetries(status:) started.
+◇ Test transientFailuresRetryAtOneFiveAndThirtyMinutes() started.
+◇ Test retryableResponsesHonorLongerRetryAfter() started.
+◇ Test unreadableStateIsPreservedAndDoesNotFalselyConfirmDelivery() started.
+✔ Test customPostTextKeepsPreviousPostAndRepository() passed after 0.125 seconds.
+✔ Test freshInstallCanDraftWithoutRepositorySetup() passed after 0.128 seconds.
+✔ Test localBuildCanUseConfiguredRepository() passed after 0.128 seconds.
+✔ Test releaseDraftLinksToBundledRepositoryEvenWithLocalOverride() passed after 0.128 seconds.
+✔ Test customPromptOverridesFrozenUntilReset() passed after 0.128 seconds.
+✔ Test aliasesResolveFromClaudeEventArray() passed after 0.128 seconds.
+✔ Test additionalOptionsAreDetected() passed after 0.128 seconds.
+✔ Test invalidConfigurationFallsBackToProjectRepository() passed after 0.128 seconds.
+✔ Test partialAliasBaselineKeepsRecoveredAliasSilentAndDetectsChanges() passed after 0.128 seconds.
+✔ Test loginShellLocationsAreSavedAndReused() passed after 0.128 seconds.
+✔ Test missingClaudeAndFailedAliasLeaveCodexWorking() passed after 0.128 seconds.
+✔ Test errorResultDoesNotRegisterModelUsage() passed after 0.128 seconds.
+✔ Test aliasesResolveFromResultModelUsage() passed after 0.128 seconds.
+✔ Test changedAliasIdIsReportedAsNewModel() passed after 0.128 seconds.
+✔ Test unreadableConfigDoesNotBlockAliasesOrCodex() passed after 0.128 seconds.
+✔ Test firstLaunchDoesNotCreateBaselineWhenEverySourceFails() passed after 0.128 seconds.
+✔ Test recoveringClaudeAliasSeedsQuietlyWhileHealthyCodexStillPostsNewModel() passed after 0.128 seconds.
+✔ Test firstLaunchWithNoCLILeavesStoreMissingAndRunsNoCheck() passed after 0.128 seconds.
+✔ Test unavailableCodexCacheSeedsWhenItFirstBecomesReadable() passed after 0.129 seconds.
+✔ Test choosesNewestInstalledCLIAndRechecksOnNextBuild() passed after 0.128 seconds.
+✔ Test missingAndUnreadableCacheDoNotNotifyOrCrash() passed after 0.129 seconds.
+✔ Test failedClaudeAliasesRemainPendingWhileCodexSeedsAndWorks() passed after 0.129 seconds.
+✔ Test unreadableCachePathDoesNotNotifyOrCrash() passed after 0.128 seconds.
+✔ Test firstLaunchSeedsOnlyFoundProviderThenNextCheckRunsNewModel() passed after 0.129 seconds.
+✔ Test manualPostBeforeDraftReadyReturnDoesNotAskOwnerToPostAgain() passed after 0.129 seconds.
+✔ Test interruptedAfterSeedingResumesLoginAndRegistrationWithoutRepeatingEither() passed after 0.129 seconds.
+✔ Test confirmedRetryPostSurvivesRunURLWriteFailureWithoutPostingAgain() passed after 0.129 seconds.
+✔ Test slopNowBuildsAndPostsAKnownModelWithoutAnyNewModel() passed after 0.129 seconds.
+✔ Test nextPostLinksPreviousPostForSameProvider() passed after 0.129 seconds.
+✔ Test failedBuildIsNotPostedAndRetriesOnNextCheck() passed after 0.129 seconds.
+✔ Test failedRunWithSavedURLIsReconciledWithoutPostingAgain() passed after 0.129 seconds.
+✔ Test registrationFailureCanBeRetried() passed after 0.129 seconds.
+✔ Test firstCheckSeedsVisibleModelsWithoutNotification() passed after 0.129 seconds.
+✔ Test installingCLIOnLaterLaunchSeedsExistingModelsWithoutPosting() passed after 0.129 seconds.
+✔ Test recordingFailureNotifiesAndRetriesModel() passed after 0.129 seconds.
+✔ Test approvalGatedRegistrationIsRecheckedUntilApproved() passed after 0.129 seconds.
+✔ Test manualPostDuringLaterCheckPreservesSeenModels() passed after 0.129 seconds.
+✔ Test deliberateDisableAfterSuccessfulSetupDoesNotReenableItem() passed after 0.129 seconds.
+✔ Test legacyStoreWithoutSourceStateSeedsQuietlyThenDetectsNewModels() passed after 0.129 seconds.
+✔ Test failedSlopNowPostRetriesRecordedDemoOnNextCheck() passed after 0.129 seconds.
+✔ Test failedSlopNowPostRetriesAfterRelaunch() passed after 0.129 seconds.
+✔ Test manualPostAfterDraftReadySavesURLAndLinksNextPost() passed after 0.129 seconds.
+✔ Test completedOnboardingDoesNotRepeatLoginOrRegistration() passed after 0.129 seconds.
+✔ Test savedRunURLRecoversConfirmedPostAfterSeenStoreFailureAndRestart() passed after 0.129 seconds.
+✔ Test successfulBuildIsRecordedBeforeModelIsSeen() passed after 0.129 seconds.
+✔ Test failedPostWithNoRecordableOutputIsNotRetried() passed after 0.129 seconds.
+✔ Test timedOutBuildIsNotPostedOrSeen() passed after 0.129 seconds.
+✔ Test laterCheckNotifiesEachNewVisibleModelAndPersistsIt() passed after 0.129 seconds.
+✔ Test confirmedManualFailureRetriesOnNextCheckAndRecordsSuccessfulHistory() passed after 0.129 seconds.
+✔ Test twoModelsRunSequentially() passed after 0.129 seconds.
+✔ Test claudeModelUsesHeadlessPermissionSkippingCommand() passed after 0.129 seconds.
+✔ Test initialDeclineSurvivesRelaunchAndCleansLegacyQueue() passed after 0.131 seconds.
+✔ Test failedAcknowledgementAndUnreadableStateFailClosed() passed after 0.131 seconds.
+✔ Test sharingDestinationRepairWithdrawsOldGrantAfterAnUnsavedChange() passed after 0.131 seconds.
+✔ Test corruptStateIsPreservedAcrossDeclineAcknowledgementAndResume() passed after 0.131 seconds.
+✔ Test launchWithRotatedKeyKeepsChoiceAndWithdrawsUsingRepairedCredentials() passed after 0.130 seconds.
+✔ Test configurationRotationKeepsChoiceAndDestinationChangeWithdrawsOriginalGrant() passed after 0.131 seconds.
+✔ Test failedLegacyCleanupKeepsQueueUnusedAndChoiceDisabled() passed after 0.131 seconds.
+✔ Test changedDisclosureWithdrawsSavedGrantWithoutReusingItsChoice() passed after 0.130 seconds.
+✔ Test failedInitialWriteStillSubmitsButKeepsVisiblePendingState() passed after 0.130 seconds.
+✔ Test statusSnapshotShowsWatchedProvidersAndLatestPostAfterChecks() passed after 0.130 seconds.
+✔ Test launchAndWakeCheckOnlyWhenMoreThanThirtyMinutesOverdue() passed after 0.130 seconds.
+✔ Test firstLaunchWithoutLastCheckRunsImmediately() passed after 0.130 seconds.
+✔ Test untrustedOrInvalidObservationsNeverSubmit() passed after 0.130 seconds.
+✔ Suite RepositoryURLTests passed after 0.132 seconds.
+✔ Test accountObservationSubmitsNormalizedHandleOnce() passed after 0.130 seconds.
+✔ Test failedSubmissionStaysUndeliveredAndRepeatedEventsDoNotFloodBackend() passed after 0.129 seconds.
+✔ Suite CodexExecutableResolverTests passed after 0.132 seconds.
+✔ Suite OnboardingTests passed after 0.132 seconds.
+✔ Test onlyExplicitHTTPSProjectAndPublishableKeyEnableSubmission() passed after 0.130 seconds.
+✔ Test unreadableStateIsPreservedAndDoesNotFalselyConfirmDelivery() passed after 0.129 seconds.
+✔ Test crashBeforeCompletionRetriesNextCheck() passed after 0.134 seconds.
+✔ Test sharingRequiresDurableChoiceAndNeverReplaysOnRestart() passed after 0.136 seconds.
+✔ Test monotonicExpiryDropsRetryEvenIfWallClockDoesNotMove() passed after 0.136 seconds.
+✔ Test failedPostNotifiesAndLeavesModelUnseenForRetry() passed after 0.136 seconds.
+✔ Test failedDeclineStopsCollectionAndRetainsGrantForSuccessfulSaveRetry() passed after 0.142 seconds.
+✔ Test reportingAndWithdrawalSendOnlyTheContractAndNeverPersistObservedHandles() passed after 0.145 seconds.
+✔ Suite XSharingPayloadTests passed after 0.146 seconds.
+✔ Test upgradeNeverReportsPendingOrDeliveredLegacyHandlesAfterAcknowledgement() passed after 0.145 seconds.
+✔ Test permanentOrdinaryFailureNeverRetries(status:) with 6 test cases passed after 0.146 seconds.
+✔ Test numericRetryAfterReturnsDelayInSeconds() passed after 0.147 seconds.
+✔ Test preservesShortRemainingDeadlineAndRPCOutcome() passed after 0.147 seconds.
+✔ Test exposesHTTPStatusAndRetryAfterWithoutTreatingFailureStatusAsTransportFailure() passed after 0.147 seconds.
+✔ Test uncertainManualPostIsNotRetriedAndDraftOnlyRetryWaitsForOwner() passed after 0.146 seconds.
+✔ Test malformedWithdrawalMetadataFailsClosedWithoutReplacingRevocationData() passed after 0.147 seconds.
+✔ Test boundsRequestsToFifteenSeconds() passed after 0.147 seconds.
+✔ Test HTTPDateRetryAfterReturnsDelayRelativeToClock() passed after 0.147 seconds.
+✔ Test invalidAndPastRetryAfterValuesAreIgnored() passed after 0.147 seconds.
+✔ Suite XHandleRegistrationTransportTests passed after 0.148 seconds.
+✔ Test equivalentDestinationDoesNotClearCurrentAccountOrReleasePausedRequest() passed after 0.147 seconds.
+✔ Test newModelPostsRecordedVideoAndSavesItsURL() passed after 0.147 seconds.
+✔ Test customRunSharesTheOneAtATimeGuard() passed after 0.148 seconds.
+✔ Test requestDuringARunIsSkipped() passed after 0.148 seconds.
+✔ Test unconfiguredObservationsAreNotCollectedForLaterConfiguration() passed after 0.149 seconds.
+✔ Suite CheckSchedulerTests passed after 0.150 seconds.
+✔ Test pendingHistoryStaysWithItsDestinationAndResumesWhenSelectedAgain() passed after 0.149 seconds.
+✔ Test declinePersistsWithdrawalAndReplacementUsesFreshGrant() passed after 0.150 seconds.
+✔ Test confirmedPostSurvivesRunURLWriteFailureWithoutRetryingPost() passed after 0.149 seconds.
+✔ Test pendingObservationSurvivesRestartAndDeliveredObservationDoesNotResubmit() passed after 0.149 seconds.
+✔ Test claudePostLinksPreviousOpenAIPost() passed after 0.150 seconds.
+✔ Test draftReadyAsksOwnerToPostWithoutSavingAPostURL() passed after 0.150 seconds.
+✔ Suite CheckTests passed after 0.152 seconds.
+✔ Test sharingKeyRepairRetriesAfterItsFirstSaveFails() passed after 0.153 seconds.
+✔ Test timerRetriesWithoutResumeAndRepeatedObservationsKeepTheDeadline() passed after 0.153 seconds.
+✔ Test pendingObservationIsReadableFromDiskBeforeResponseCompletes() passed after 0.152 seconds.
+✔ Test keyChangeReleasesClientFailureExactlyOnceAndIdenticalConfigurationDoesNotRetry() passed after 0.153 seconds.
+✔ Test retryDeadlineSurvivesRestart() passed after 0.152 seconds.
+✔ Test accountAbsenceInvalidatesLateReplyEvenAfterSameHandleRediscovery() passed after 0.154 seconds.
+✔ Test overlappingEventsSubmitEachAccountOnceAndLogoutClearsCurrentAccount() passed after 0.152 seconds.
+✔ Suite XHandleRegistrationTests passed after 0.154 seconds.
+✔ Test ordinaryReportRetriesOnceWithSameSequenceAfterFiveSeconds() passed after 0.154 seconds.
+✔ Test windowsDeduplicateRediscoveryAndRejectPopupsAndLateEvents() passed after 0.154 seconds.
+✔ Test wallClockAdjustmentDoesNotExpireLiveOrdinaryEvent(jump:) with 2 test cases passed after 0.154 seconds.
+✔ Test failedWriteAfterRemoteSuccessRetriesAfterDiskRecoveryAndPersistsDelivery() passed after 0.153 seconds.
+✔ Test transientOrdinaryFailuresRetryOnlyOnce(status:) with 6 test cases passed after 0.154 seconds.
+✔ Test completingOneTimerRetryDoesNotCancelAnotherHandle() passed after 0.155 seconds.
+✔ Suite XHandleTimerTests passed after 0.156 seconds.
+✔ Test cancellationAfterRemoteCommitRetriesSafelyOnRestart() passed after 0.154 seconds.
+✔ Suite XHandleInterruptionTests passed after 0.156 seconds.
+✔ Test concurrentWindowsKeepSeparateLiveReports() passed after 0.156 seconds.
+✔ Test lateOldGrantReplyCannotBlockOrDisableReplacement() passed after 0.155 seconds.
+✔ Test sharingKeyRepairSurvivesAnOlderInFlightWithdrawalFailure() passed after 0.155 seconds.
+✔ Test ordinaryRetryHonorsDeadlineAndBoundsTimeout() passed after 0.155 seconds.
+✔ Test restartDoesNotReuseSequenceReservedForUnconfirmedReport() passed after 0.155 seconds.
+✔ Suite XSharingPersistenceTests passed after 0.156 seconds.
+✔ Test destinationChangeWhileSubmittingWaitsForTheSameHandleToFinish() passed after 0.157 seconds.
+✔ Test transientFailuresRetryAtOneFiveAndThirtyMinutes() passed after 0.156 seconds.
+✔ Test retryableResponsesHonorLongerRetryAfter() passed after 0.156 seconds.
+✔ Suite XHandleRecoveryTests passed after 0.159 seconds.
+✔ Test withdrawalForOtherDestinationDoesNotBlockNewDestinationActivity() passed after 0.159 seconds.
+✔ Test permanentWithdrawalRetriesOnceOnLaunchAndOnceOnKeyRepair() passed after 0.161 seconds.
+✔ Test expiredReplacementEventCannotReplayAfterWithdrawalRecovery() passed after 0.162 seconds.
+✔ Test declinedRestartResumesOnlyUsernameFreeWithdrawalThenDeletesOutbox() passed after 0.163 seconds.
+✔ Test keyChangeDuringRequestAllowsOneRetryAfterOldKeyIsRejected() passed after 0.163 seconds.
+✔ Suite XHandleConfigurationTests passed after 0.165 seconds.
+✔ Test withdrawalHonorsLongerRetryAfterWithoutOrdinaryDeadline() passed after 0.164 seconds.
+✔ Suite XSharingRetryPolicyTests passed after 0.165 seconds.
+✔ Test replacementWaitsForSameDestinationWithdrawalThenReportsLiveEvent() passed after 0.164 seconds.
+✔ Test durableWithdrawalRetriesAtOneFiveAndThirtyMinutes() passed after 0.165 seconds.
+✔ Test discoveredEnvShebangCliRunsWithLoginShellPath() passed after 0.744 seconds.
+✔ Suite ClaudeDetectionTests passed after 0.746 seconds.
+✔ Test run with 126 tests in 15 suites passed after 0.746 seconds.

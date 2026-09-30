@@ -1,0 +1,71 @@
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  withdraw_x_sharing_v1  
+-------------------------
+ {"status": "withdrawn"}
+(1 row)
+
+  withdraw_x_sharing_v1  
+-------------------------
+ {"status": "withdrawn"}
+(1 row)
+
+  withdraw_x_sharing_v1  
+-------------------------
+ {"status": "withdrawn"}
+(1 row)
+
+  withdraw_x_sharing_v1  
+-------------------------
+ {"status": "withdrawn"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+  report_x_activity_v1  
+------------------------
+ {"status": "recorded"}
+(1 row)
+
+X handle database checks passed (disposable PostgreSQL).

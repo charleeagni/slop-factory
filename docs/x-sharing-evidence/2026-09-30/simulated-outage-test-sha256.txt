@@ -1,0 +1,1 @@
+fe808b3cc1e5b893faabd6acf96b4dbb9c2937c2269c93b9cf5474c5a25eb0e9  Tests/FactoryCoreTests/XSharingSimulatedOutageTests.swift

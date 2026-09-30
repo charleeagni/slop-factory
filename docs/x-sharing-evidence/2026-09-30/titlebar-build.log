@@ -1,0 +1,11 @@
+[0/1] Planning build
+Building for production...
+[0/4] Write sources
+[1/4] Write swift-version--58304C5D6DBC2206.txt
+[3/5] Compiling FactoryCore CheckScheduler.swift
+[4/6] Compiling SlopFactory SlopFactoryApp.swift
+[4/6] Write Objects.LinkFileList
+[5/6] Linking SlopFactory
+Build of product 'SlopFactory' complete! (7.49s)
+.build/verification/Slop Factory Sharing Controls 20260930.app: replacing existing signature
+.build/verification/Slop Factory Sharing Controls 20260930.app
